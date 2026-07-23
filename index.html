@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Hub</title>
+  <link rel="stylesheet" href="styling/notebook-styling.css">
+  <link rel="stylesheet" href="styling/forms.css">
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+  <div class="card shadow padding" style="width:360px; max-width:90vw; background-color:#f5f5f5;">
+    <h2 style="margin-top:0;">Client Hub</h2>
+    <p style="font-size:14px; color:var(--muted);">Select your name to continue.</p>
+    <form id="loginForm">
+      <div class="form-group">
+        <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-family:'Courier New',monospace;">Registered user</label>
+        <select class="input-block" id="login-user"></select>
+      </div>
+      <button type="submit" class="btn-primary btn-block" style="margin-top:8px;">Continue</button>
+    </form>
+    <div id="noUsersMsg" style="display:none; margin-top:16px; font-size:13px; color:var(--muted);">
+      No registered users yet. Add yourself below to get started — you can manage users later from the Users tab.
+    </div>
+    <details id="quickRegisterDetails" style="margin-top:14px;">
+      <summary style="cursor:pointer; font-family:'Courier New',monospace; font-size:13px; color:var(--blue-tab);">+ Register a new user</summary>
+      <form id="quickRegisterForm" style="margin-top:10px;">
+        <div class="form-group">
+          <input class="input-block" type="text" id="qr-name" placeholder="Full name" required>
+        </div>
+        <div class="form-group">
+          <select class="input-block" id="qr-role">
+            <option value="sales">Sales</option>
+            <option value="graphics">Graphics</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-secondary-outline btn-block">Register &amp; continue</button>
+      </form>
+    </details>
+  </div>
+</div>
+
+<div id="appShell" style="display:none;">
+
+<header>
+  <div class="brand">
+    <h1>Client Hub</h1>
+    <span class="tagline">Sales workflow — mockup</span>
+  </div>
+  <div style="display:flex; align-items:center; gap:16px;">
+    <div class="today" id="todayDate"></div>
+    <div class="utility" id="userBadge" style="font-size:12px; color:var(--muted);"></div>
+    <span class="back-link" id="logoutLink" style="cursor:pointer;">Switch user</span>
+  </div>
+</header>
+
+<nav>
+  <button class="nav-btn active" data-view="dashboard">Reminders</button>
+  <button class="nav-btn" data-view="quickadd" id="navQuickAdd">Quick Add</button>
+  <button class="nav-btn" data-view="directory">Clients</button>
+  <button class="nav-btn" data-view="data">Data</button>
+  <button class="nav-btn" data-view="users">Users</button>
+</nav>
+
+
+<main>
+
+  <!-- DASHBOARD / REMINDERS -->
+  <section class="view active" id="view-dashboard">
+    <div class="reminder-strip">
+      <div class="reminder-card card shadow"><h3>Renewals due (30 days)</h3><div class="num" id="stat-renewals">0</div></div>
+      <div class="reminder-card card shadow"><h3>Upcoming key dates</h3><div class="num" id="stat-keydates">0</div></div>
+      <div class="reminder-card card shadow"><h3>Leads needing follow-up</h3><div class="num" id="stat-followups">0</div></div>
+      <div class="reminder-card card shadow"><h3>Total clients tracked</h3><div class="num" id="stat-total">0</div></div>
+    </div>
+
+    <div class="section-title">Needs attention</div>
+    <div id="alertList"></div>
+  </section>
+
+  <!-- QUICK ADD -->
+  <section class="view" id="view-quickadd">
+    <div class="form-card card shadow padding">
+      <h2>Add a client or lead</h2>
+      <form id="quickAddForm">
+        <div class="field-row">
+          <div class="field">
+            <label>Business name *</label>
+            <input type="text" id="qa-business" required>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="qa-category">
+              <option value="Lead">Lead (not yet a client)</option>
+              <option value="Retail">Retail</option>
+              <option value="Antiques/Thrift">Antiques / Thrift</option>
+              <option value="Restaurant">Restaurant</option>
+              <option value="Business Partner">Business Partner</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Contact name</label>
+            <input type="text" id="qa-contact">
+          </div>
+          <div class="field">
+            <label>Phone / email</label>
+            <input type="text" id="qa-info">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Note (what happened / what's next)</label>
+            <textarea id="qa-note" placeholder="e.g. Interested in fall issue, follow up in 2 weeks"></textarea>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Follow-up date (optional)</label>
+            <input type="date" id="qa-followup">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Save client</button>
+        <div class="form-note">This takes about 30 seconds — the goal is to capture the lead before you lose it, not fill out every field.</div>
+      </form>
+    </div>
+  </section>
+
+  <!-- DIRECTORY -->
+  <section class="view" id="view-directory">
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by business or contact name…">
+    </div>
+    <div class="client-grid" id="clientGrid"></div>
+  </section>
+
+  <!-- CLIENT DETAIL (hidden until a card is clicked) -->
+  <section class="view" id="view-detail">
+    <span class="back-link" id="backToDirectory">&larr; Back to clients</span>
+    <div class="utility" id="d-breadcrumb" style="font-size:12px; color:var(--muted); margin-bottom:10px;"></div>
+    <div class="detail-header">
+      <div>
+        <h2 id="d-business"></h2>
+        <div class="detail-sub" id="d-sub"></div>
+      </div>
+    </div>
+
+    <div class="detail-columns">
+      <div class="detail-main">
+        <div class="section-title">Campaign / ad history</div>
+        <div id="timelineList"></div>
+        <details class="add-inline" id="addCampaignDetails">
+          <summary>+ Log a new campaign / ad</summary>
+          <div class="form-card card shadow padding" style="margin-top:12px;">
+            <form id="campaignForm">
+              <div class="field-row">
+                <div class="field"><label>What ran</label><input type="text" id="c-what" placeholder="e.g. Half-page, Fall Issue"></div>
+                <div class="field"><label>Date</label><input type="date" id="c-date"></div>
+              </div>
+              <div class="field-row">
+                <div class="field"><label>Proof / creative file reference</label><input type="text" id="c-proof" placeholder="e.g. StacyMartin_2026_Fall.pdf"></div>
+              </div>
+              <button type="submit" class="btn-primary">Add to timeline</button>
+            </form>
+          </div>
+        </details>
+      </div>
+
+      <div class="detail-side">
+        <div class="side-card card shadow padding">
+          <h4>Key dates</h4>
+          <div id="keyDatesList"></div>
+        </div>
+        <div class="side-card card shadow padding">
+          <h4>Contact</h4>
+          <div id="contactInfo"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA / EXPORT-IMPORT -->
+  <section class="view" id="view-data">
+    <div class="form-card card shadow padding">
+      <h2>Shared file</h2>
+      <p style="font-size:14px; color:var(--muted); max-width:520px;">
+        This computer keeps its own copy of the client list. To stay in sync with the shared drive,
+        <strong>save</strong> a fresh copy there when you're done working, and <strong>load</strong>
+        the shared file when you sit down to work — including at the start of your day.
+      </p>
+
+      <div class="section-title" style="margin-top:24px;">Save to shared file</div>
+      <p style="font-size:14px;">Download the current client list, then move/replace the file on the shared drive.</p>
+      <button class="btn-primary" id="exportBtn">Save file (.json)</button>
+
+      <div class="section-title" style="margin-top:30px;">Load shared file</div>
+      <p style="font-size:14px;">
+        Choose the shared file from the drive. <strong>This replaces</strong> what's currently on this computer —
+        save your own copy first if you have unsaved changes you don't want to lose.
+      </p>
+      <input type="file" id="importFile" accept="application/json" style="margin-bottom:12px; display:block;">
+      <button class="btn-secondary-outline" id="importBtn">Load file</button>
+      <div id="importStatus" style="font-size:13px; margin-top:10px; color:var(--brass-dark);"></div>
+    </div>
+  </section>
+
+  <!-- USERS -->
+  <section class="view" id="view-users">
+    <div class="form-card card shadow padding" style="margin-bottom:24px;">
+      <h2>Register a new user</h2>
+      <form id="registerUserForm">
+        <div class="field-row">
+          <div class="field">
+            <label>Full name</label>
+            <input type="text" id="ru-name" required>
+          </div>
+          <div class="field">
+            <label>Role</label>
+            <select id="ru-role">
+              <option value="sales">Sales</option>
+              <option value="graphics">Graphics</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Register user</button>
+      </form>
+    </div>
+
+    <div class="section-title">Registered users</div>
+    <div id="usersList"></div>
+
+    <div style="margin-top:24px; font-size:12px; color:var(--muted);">
+      User accounts are loaded from a users file path (currently unset in this mockup —
+      will be pointed at a shared file later). Until then, they're kept on this computer.
+    </div>
+  </section>
+
+</main>
+
+</div>
+
+<script src="js/globals.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/users.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/quickadd.js"></script>
+<script src="js/directory.js"></script>
+<script src="js/detail.js"></script>
+<script src="js/importexport.js"></script>
+<script src="js/init.js"></script>
+
+</body>
+</html>
