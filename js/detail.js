@@ -6,11 +6,13 @@ function renderTimeline(){
     const timelineList = document.getElementById('timelineList');
 
     if (!timelineList || !currentClientId) return;
-        const client = data.clients.find((entry) => entry.id === currentClientId);
+    const client = data.clients.find((entry) => entry.id === currentClientId);
     if (!client) return;
-        timelineList.innerHTML = '';
-    if (!client.timeline || client.timeline.length === 0) 
-        { timelineList.innerHTML = '<div class="empty">No campaigns logged yet.</div>'; return; }
+    timelineList.innerHTML = '';
+    if (!client.timeline || client.timeline.length === 0) {
+        timelineList.innerHTML = '<div class="empty">No campaigns logged yet.</div>';
+        return;
+    }
 
     const sortedTimeline = [...client.timeline]
         .map((entry, index) => ({ entry, index }))
@@ -19,26 +21,27 @@ function renderTimeline(){
     sortedTimeline.forEach(({ entry, index }) => {
         const item = document.createElement('div');
         item.className = 'timeline-item';
-        
+
         const proofHtml = entry.proof ? `<div class="tlink">📎 <a href="${escapeHtml(entry.proof)}" target="_blank" rel="noopener">${escapeHtml(entry.proof)}</a></div>` : '<div class="tlink" style="color:var(--muted);">No proof attached</div>';
-        
-        const editButton = currentUser?.role === 'graphics' ? `<button type="button" class="btn-secondary-outline btn-small" data-edit-proof="${index}">${entry.proof ? 'Edit proof link' : 'Attach proof'}</button>` : '';
-        
+        const editButton = `<button type="button" class="btn-secondary-outline btn-small" data-edit-proof="${index}">${entry.proof ? 'Edit proof link' : 'Attach proof'}</button>`;
         const deleteButton = `<button type="button" class="btn-secondary-outline btn-small" data-remove-timeline="${index}">Remove Ad</button>`;
-        
+
         item.innerHTML = `<div class="tdate">${entry.date || 'No date'}</div><div class="ttitle">${escapeHtml(entry.what || 'Untitled campaign')}</div>${proofHtml}<div class="timeline-actions">${editButton}${deleteButton}</div>`;
-        
+
         timelineList.appendChild(item);
     });
 
     timelineList.querySelectorAll('[data-edit-proof]').forEach((button) => {
         button.addEventListener('click', () => {
-
             const index = parseInt(button.getAttribute('data-edit-proof'), 10);
             const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
             const current = clientEntry.timeline[index].proof || '';
             const link = prompt('Paste the shared-drive link or path to the proof file:', current);
-            if (link !== null) { clientEntry.timeline[index].proof = link.trim(); saveData(data); openDetail(currentClientId); }
+            if (link !== null) {
+                clientEntry.timeline[index].proof = link.trim();
+                saveData(data);
+                openDetail(currentClientId);
+            }
         });
     });
 
@@ -60,7 +63,53 @@ function renderContact(){
     if (!contactInfo || !currentClientId) return;
     const client = data.clients.find((entry) => entry.id === currentClientId);
     if (!client) return;
-    contactInfo.innerHTML = `<div class="datefield"><span>Contact</span><span>${escapeHtml(client.contact || ', ')}</span></div><div class="datefield"><span>Info</span><span>${escapeHtml(client.info || ', ')}</span></div><div class="datefield"><span>Note</span><span>${escapeHtml(client.note || ', ')}</span></div>`;
+
+    contactInfo.innerHTML = `
+        <div class="datefield">
+            <span>Contact</span>
+            <span class="editable-contact" data-field="contact">${escapeHtml(client.contact || '—')}</span>
+        </div>
+        <div class="datefield">
+            <span>Info</span>
+            <span class="editable-contact" data-field="info">${escapeHtml(client.info || '—')}</span>
+        </div>
+        <div class="datefield">
+            <span>Note</span>
+            <span class="editable-contact" data-field="note">${escapeHtml(client.note || '—')}</span>
+        </div>
+        <div class="datefield" style="margin-top:10px; border-bottom:none; justify-content:flex-end;">
+            <button type="button" class="btn-secondary-outline btn-small" id="deleteClientBtn">Delete client</button>
+        </div>
+    `;
+
+    contactInfo.querySelectorAll('.editable-contact').forEach((field) => {
+        field.addEventListener('click', () => {
+            const currentValue = field.textContent.trim();
+            const nextValue = prompt('Update this field:', currentValue === '—' ? '' : currentValue);
+            if (nextValue === null) return;
+
+            const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
+            if (!clientEntry) return;
+
+            clientEntry[field.getAttribute('data-field')] = nextValue.trim();
+            saveData(data);
+            renderContact();
+            document.getElementById('d-sub').textContent = `${clientEntry.category || 'Client'} · ${clientEntry.contact || 'No contact name on file'}`;
+        });
+    });
+
+    document.getElementById('deleteClientBtn')?.addEventListener('click', () => {
+        const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
+        if (!clientEntry) return;
+        if (!confirm(`Delete ${clientEntry.business || 'this client'}? This cannot be undone.`)) return;
+
+        data.clients = (data.clients || []).filter((entry) => entry.id !== currentClientId);
+        saveData(data);
+        currentClientId = null;
+        renderDirectory();
+        renderDashboard();
+        showView('directory');
+    });
 }
 
 function renderKeyDates(){

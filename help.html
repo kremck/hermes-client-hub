@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Hub Help</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --paper: #f8fafc;
+      --card: #ffffff;
+      --rule: #e5e7eb;
+      --blue: #2563eb;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+
+    h1, h2, h3 { margin-top: 0; }
+    p { color: var(--muted); }
+
+    details {
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #fff;
+      margin-bottom: 12px;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    details p {
+      margin: 10px 0 0;
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <h1>Client Hub Help</h1>
+      <p>
+        This page goes over use cases for Client Hub and clears up common questions.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Frequently asked questions</h2>
+
+      <details>
+        <summary>How do I connect my clients to everyone else's?</summary>
+        <p>Under the "Data" tab, you have two options:</p>
+        <ul>
+          <li><strong>Load shared file</strong> - This replaces your local data with the shared file. Make sure to save your own copy first if you have unsaved changes you don't want to lose.</li>
+          <li><strong>Merge shared file</strong> - This adds any new clients or users from the shared file without overwriting your current local records.</li>
+            <p>NOTE: Changes to clients are asynchronous, please figure out how to fix this issue.</p>
+        </ul>
+        </details>
+
+      <details>
+        <summary>How do I add a new client?</summary>
+        <p>Under "Quick Add", you can enter the client's information.  To add campaigns and other details, you will need to navigate to the Clients or Reminders tab, click on the client, and add the ad being worked on.</p>
+        <p>The graphics team is able to attach the path to the proof files.</p>
+      </details>
+
+      <details>
+        <summary>How do I update a client's information?</summary>
+        <p>To update a client's information, navigate to the Clients or Reminders tab, click on the client, and edit the details as needed.</p>
+      </details>
+    </div>
+  </div>
+</body>
+</html>
