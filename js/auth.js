@@ -1,3 +1,7 @@
+/* ===========================
+   Authentication Functions (js/auth.js)
+   =========================== */
+
 async function tryRestoreSession(){
     const fileUsers = await tryLoadUsersFromFile();
     if (fileUsers) { users = fileUsers; saveUsers(users); }

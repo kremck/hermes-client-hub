@@ -1,3 +1,7 @@
+/* ===========================
+   User Management (js/users.js)
+   =========================== */
+
 function populateLoginDropdown(){
     const select = document.getElementById('login-user');
     if (!select) return;
@@ -51,6 +55,9 @@ function registerUser(){
         event.preventDefault();
         const name = document.getElementById('ru-name').value.trim();
         const role = document.getElementById('ru-role').value;
+
+        document.getElementById('ru-name').value = '';
+        
         if (!name) return;
         if (users.some((entry) => entry.name.toLowerCase() === name.toLowerCase())) { alert('That user is already registered.'); return; }
         users.push({ name, role }); saveUsers(users); populateLoginDropdown(); renderUsersList(); event.target.reset();

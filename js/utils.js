@@ -1,5 +1,5 @@
 /* ===========================
-   Date Utilities
+   Date Utilities (js/utils.js)
    =========================== */
 
 function futureDate(daysAhead)

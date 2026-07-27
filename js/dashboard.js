@@ -1,3 +1,7 @@
+/* ===========================
+   Dashboard Functions (js/dashboard.js)
+   =========================== */
+
 function renderDashboard()
 {
     const list = document.getElementById('alertList');

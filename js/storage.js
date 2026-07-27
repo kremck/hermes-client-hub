@@ -1,5 +1,5 @@
 /* ===========================
-   Client Data Storage
+   Client Data Storage (js/storage.js)
    =========================== */
 
 function loadData() {
@@ -73,7 +73,7 @@ function loadData() {
 
                 info: "(555) 774-1120",
 
-                note: "New lead — interested in advertising opportunity given rise in thrift shopping.",
+                note: "New lead, interested in advertising opportunity given rise in thrift shopping.",
 
                 followup: futureDate(3),
 
@@ -95,7 +95,7 @@ function loadData() {
 
                 info: "renee@cascadebp.com",
 
-                note: "Campaign ending soon — send renewal reminder.",
+                note: "Campaign ending soon, send renewal reminder.",
 
                 followup: "",
 

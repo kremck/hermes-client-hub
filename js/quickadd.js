@@ -1,3 +1,7 @@
+/* ===========================
+   Quick Add (js/quickadd.js)
+   =========================== */
+
 function setupQuickAdd()
 {
     const form = document.getElementById('quickAddForm');

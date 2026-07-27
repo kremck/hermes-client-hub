@@ -1,3 +1,7 @@
+/* ===========================
+   Navigation (js/navigation.js)
+   =========================== */
+
 function setupNavigation()
 {
     document.querySelectorAll('.nav-btn').forEach((btn) =>

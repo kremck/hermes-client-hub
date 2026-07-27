@@ -1,5 +1,5 @@
 /* ===========================
-   Global Variables & Constants
+   Global Variables & Constants (js/globals.js)
    =========================== */
 
 const STORAGE_KEY = "clientHubData_v1";
