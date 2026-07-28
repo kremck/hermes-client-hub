@@ -14,6 +14,7 @@
   <div class="card shadow padding" style="width:360px; max-width:90vw; background-color:#f5f5f5;">
     <h2 style="margin-top:0;">Client Hub</h2>
     <p style="font-size:14px; color:var(--muted);">Select your name to continue.</p>
+
     <form id="loginForm">
       <div class="form-group">
         <label style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-family:'Courier New',monospace;">Registered user</label>
@@ -21,6 +22,7 @@
       </div>
       <button type="submit" class="btn-primary btn-block" style="margin-top:8px;">Continue</button>
     </form>
+
     <div id="noUsersMsg" style="display:none; margin-top:16px; font-size:13px; color:var(--muted);">
       No registered users yet. Add yourself below to get started - you can manage users later from the Users tab.
     </div>
@@ -76,8 +78,24 @@
       <div class="reminder-card card shadow"><h3>Total clients tracked</h3><div class="num" id="stat-total">0</div></div>
     </div>
 
-    <div class="section-title">Needs attention</div>
-    <div id="alertList"></div>
+    <div class="dashboard-columns">
+      <div class="dashboard-column">
+        <div class="section-title">Needs attention</div>
+        <div id="alertList"></div>
+      </div>
+
+      <div class="dashboard-column">
+        <div class="calendar-card card shadow">
+          <div class="calendar-toolbar">
+            <button type="button" class="btn-secondary-outline" id="calendarPrev">&larr; Prev</button>
+            <div class="calendar-title" id="calendarMonthLabel">Month</div>
+            <button type="button" class="btn-secondary-outline" id="calendarNext">Next &rarr;</button>
+          </div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+          <div id="calendarDayList" class="calendar-day-list"></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- QUICK ADD -->

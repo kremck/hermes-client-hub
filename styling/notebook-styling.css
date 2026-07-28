@@ -192,6 +192,115 @@ textarea {
 
 #appShell { display: none; }
 
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.dashboard-column {
+  min-width: 0;
+}
+
+.calendar-card {
+  margin-bottom: 16px;
+}
+
+.calendar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.calendar-title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding-bottom: 4px;
+}
+
+.calendar-day {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  background: #fff;
+  min-height: 72px;
+  padding: 6px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.calendar-day.selected {
+  border-color: var(--blue-tab);
+  box-shadow: inset 0 0 0 1px var(--blue-tab);
+}
+
+.calendar-day.today {
+  background: #f2f7ff;
+}
+
+.calendar-day.has-events {
+  background: #fff8e1;
+}
+
+.calendar-day-number {
+  font-size: 0.9rem;
+}
+
+.calendar-day-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--blue-tab);
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.calendar-empty {
+  min-height: 72px;
+}
+
+.calendar-day-list {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-event-item {
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+}
+
+.calendar-event-item:hover {
+  background: #f7f7f7;
+}
+
+.calendar-day-empty {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   header {
     flex-direction: column;
@@ -200,6 +309,7 @@ textarea {
   }
   .detail-columns { grid-template-columns: 1fr; }
   .alert-row { grid-template-columns: 1fr; }
+  .dashboard-columns { grid-template-columns: 1fr; }
 }
   margin: 0 0 -1px;
   padding: 0.75rem;
