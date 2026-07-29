@@ -16,6 +16,17 @@ function setSharedImportStatus(message, isError = false)
     status.style.color = isError ? 'var(--red-tab)' : 'var(--green-tab)';
 }
 
+function setSharedPathView(message, isError = false)
+{
+    const status = document.getElementById('sharedPathView');
+
+    if (!status)
+        return;
+
+    status.textContent = message;
+    status.style.color = isError ? 'var(--red-tab)' : 'var(--green-tab)';
+}
+
 function exportClientData()
 {
     if (!data)

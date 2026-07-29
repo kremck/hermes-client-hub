@@ -82,44 +82,9 @@ function loadData() {
                 keyDates: [],
 
                 timeline: []
-            },
-
-            {
-                id: "c3",
-
-                business: "Cascade Business Partners",
-
-                category: "Business Partner",
-
-                contact: "Renee Ford",
-
-                info: "renee@cascadebp.com",
-
-                note: "Campaign ending soon, send renewal reminder.",
-
-                followup: "",
-
-                owner: "Taylor Brooks",
-
-                keyDates: [
-
-                    {
-                        label: "Campaign end",
-                        date: futureDate(6)
-                    }
-
-                ],
-
-                timeline: [
-
-                    {
-                        what: "Full-page, Meet Mac feature",
-                        date: pastDate(140),
-                        proof: "CascadeBP_2026_MeetMac.pdf"
-                    }
-
-                ]
             }
+
+            
 
         ]
 

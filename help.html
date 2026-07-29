@@ -13,6 +13,7 @@
       --card: #ffffff;
       --rule: #e5e7eb;
       --blue: #2563eb;
+      --blue-soft: #eff6ff;
     }
 
     * { box-sizing: border-box; }
@@ -25,9 +26,57 @@
     }
 
     .page {
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 32px 20px 48px;
+      padding: 24px 20px 48px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .sidebar {
+      background: var(--card);
+      border: 1px solid var(--rule);
+      border-radius: 12px;
+      padding: 16px;
+      position: sticky;
+      top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .sidebar h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+    }
+
+    .nav-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .nav-btn.active {
+      background: var(--blue-soft);
+      border-color: var(--blue);
+      color: var(--blue);
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     .card {
@@ -36,11 +85,15 @@
       border-radius: 12px;
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 20px;
     }
 
     h1, h2, h3 { margin-top: 0; }
     p { color: var(--muted); }
+
+    .section-title {
+      margin-bottom: 12px;
+      color: var(--ink);
+    }
 
     details {
       border: 1px solid var(--rule);
@@ -56,47 +109,109 @@
       color: var(--blue);
     }
 
-    details p {
+    details p,
+    details li {
       margin: 10px 0 0;
       color: var(--ink);
+    }
+
+    .back-btn {
+      padding: 8px 12px;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
     }
   </style>
 </head>
 <body>
   <div class="page">
-    <div class="card">
-      <h1>Client Hub Help</h1>
-      <p>
-        This page goes over use cases for Client Hub and clears up common questions.
-      </p>
-      <a href="index.html">
-        <button type="button">← Go Back</button>
-      </a>
-    </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Help topics</h2>
+        <button class="nav-btn active" type="button" data-target="how-to-use">How to use Client Hub</button>
+        <button class="nav-btn" type="button" data-target="handling-data">Handling Data</button>
+        <a class="back-btn" href="index.html">← Go Back</a>
+      </aside>
 
-    <div class="card">
-      <h2>Frequently asked questions</h2>
+      <div class="content">
+        <section id="how-to-use" class="card">
+          <h1>How to use Client Hub</h1>
+          <p>This area covers the main flow for adding, reviewing, and updating client work in the app.</p>
 
-      <details>
-        <summary>How do I connect my clients to everyone else's?</summary>
-        <p>Under the "Data" tab, you have two options:</p>
-        <ul>
-          <li><strong>Load shared file</strong> - This replaces your local data with the shared file. Make sure to save your own copy first if you have unsaved changes you don't want to lose.</li>
-          <li><strong>Merge shared file</strong> - This adds any new clients or users from the shared file without overwriting your current local records.</li>
-        </ul>
-        </details>
+          <h3 class="section-title">Getting started</h3>
+          <ul>
+            <li>Open the app from the main dashboard and choose the tab that matches the task you need.</li>
+            <li>Use Quick Add for new leads or simple entries.</li>
+            <li>Open an existing client to add campaigns, reminders, and follow-up notes.</li>
+          </ul>
 
-      <details>
-        <summary>How do I add a new client?</summary>
-        <p>Under "Quick Add", you can enter the client's information.  To add campaigns and other details, you will need to navigate to the Clients or Reminders tab, click on the client, and add the ad being worked on.</p>
-        <p>The graphics team is able to attach the path to the proof files.</p>
-      </details>
+          <h3 class="section-title">Common tasks</h3>
+          <details>
+            <summary>How do I add a new client?</summary>
+            <p>Under "Quick Add", enter the client details. To add campaigns and other project information, open the client from the Clients or Reminders tab and update the record there.</p>
+            <p>The graphics team can also attach proof file paths from the client record.</p>
+          </details>
 
-      <details>
-        <summary>How do I update a client's information?</summary>
-        <p>To update a client's information, navigate to the Clients or Reminders tab, click on the client, and edit the details as needed.</p>
-      </details>
+          <details>
+            <summary>How do I update a client's information?</summary>
+            <p>Navigate to the Clients or Reminders tab, click the client, and edit the details as needed.</p>
+          </details>
+        </section>
+
+        <section id="handling-data" class="card">
+          <h2>Handling Data</h2>
+          <p>Use the Data tab when you need to share or merge client information across users or devices.</p>
+
+          <details>
+            <summary>How do I connect my clients to everyone else's?</summary>
+            <p>Under the "Data" tab, you have two options:</p>
+            <ul>
+              <li><strong>Load shared file</strong> - This replaces your local data with the shared file. Save a copy first if you want to keep your current data.</li>
+              <li><strong>Merge shared file</strong> - This adds any new clients or users from the shared file without overwriting your current local records.</li>
+            </ul>
+          </details>
+
+          <details>
+            <summary>I am confused on how to use the Data tab.</summary>
+            <li><strong>Shared Folder</strong> - This is where you can merge your clients into the main file, as well as pull everyone else's clients.  This is so the Graphics team can access your clients and attach proofs for each ad / campaign.</li>
+            <li><strong>Save File</strong> - This downloads the most concurrent client list, which includes both you and other colleague's client data and campaign data.  This is to back up your data and be able to merge with the main folder.</li>
+            <li><strong>Merge Shared File</strong> - You first choose your most recent save file (ends in .json), and after selecting it, make sure that you have a shared folder chosen.  When you press "Merge file", it will take your uploaded file and cross reference to see if it needs to add new clients.</li>
+          </details>
+        </section>
+      </div>
     </div>
   </div>
+
+  <script>
+    document.querySelectorAll('.nav-btn').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach((btn) => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        const targetId = button.getAttribute('data-target');
+        const targetSection = document.getElementById(targetId);
+
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
