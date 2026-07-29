@@ -37,6 +37,9 @@ function logout(){
     document.getElementById('loginScreen').style.display = 'flex';
 }
 
+
+/*Fairly new code might be buggy*/
+
 function registerLoginHandlers(){
     document.getElementById('loginForm')?.addEventListener('submit', (event) => {
         event.preventDefault();
@@ -45,6 +48,27 @@ function registerLoginHandlers(){
         if (!user) return;
         currentUser = { name: user.name, role: user.role };
         sessionStorage.setItem('clientHubUser', JSON.stringify(currentUser));
+        enterApp();
+    });
+
+    document.getElementById('quickRegisterForm')?.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const name = document.getElementById('qr-name').value.trim();
+        const role = document.getElementById('qr-role').value;
+        if (!name) return;
+
+        const existing = users.find((entry) => entry.name.toLowerCase() === name.toLowerCase());
+        const user = existing || { name, role };
+
+        if (!existing) {
+            users.push(user);
+            saveUsers(users);
+            populateLoginDropdown();
+        }
+
+        currentUser = { name: user.name, role: user.role };
+        sessionStorage.setItem('clientHubUser', JSON.stringify(currentUser));
+        event.target.reset();
         enterApp();
     });
 

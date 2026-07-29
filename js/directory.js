@@ -2,6 +2,8 @@
    Directory Functions (js/directory.js)
    =========================== */
 
+
+   
 function createClientCard(client)
 {
     const card = document.createElement('div');
@@ -11,11 +13,13 @@ function createClientCard(client)
         <div class="biz">${escapeHtml(client.business)}</div>
         <div class="contact">${escapeHtml(client.contact || ', ')}</div>
         ${currentUser && currentUser.role === 'graphics' ? `<div class="contact" style="font-style:italic;">Rep: ${escapeHtml(client.owner || 'Unassigned')}</div>` : ''}
-        <div class="meta"><span>${(client.timeline || []).length} campaign(s)</span><span>${(client.keyDates || []).length} key date(s)</span></div>
+        <div class="meta"><span>${(client.ads || []).length} project(s)</span><span>${(client.keyDates || []).length} key date(s)</span></div>
     `;
     card.addEventListener('click', () => openDetail(client.id));
     return card;
 }
+
+/* renderDirectory() and search() unchanged */
 
 function renderDirectory(filter = '')
 {

@@ -61,12 +61,14 @@
 <nav>
   <button class="nav-btn active" data-view="dashboard">Reminders</button>
   <button class="nav-btn" data-view="quickadd" id="navQuickAdd">Quick Add</button>
+  <button class="nav-btn" data-view="addproject" id="navAddProject">Add Project</button>
   <button class="nav-btn" data-view="directory">Clients</button>
+  <button class="nav-btn" data-view="projects">Projects</button>
   <button class="nav-btn" data-view="data">Data</button>
   <button class="nav-btn" data-view="users">Users</button>
   <!--Did this since it's an html page, it would get too cluttered to keep adding javascripts-->
   <a href="help.html">
-    <button type="button">Help</button>
+    <button class="nav-btn" data-view="help">Help</button>
   </a>
 </nav>
 
@@ -153,6 +155,55 @@
     </div>
   </section>
 
+  <!-- ADD PROJECT -->
+  <section class="view" id="view-addproject">
+    <div class="form-card card shadow padding">
+      <h2>Add a new project (For projects that have not been added)</h2>
+      <form id="addProjectForm">
+        <div class="field-row">
+          <div class="field">
+            <label>Project name *</label>
+            <textarea id="ap-projectname" placeholder="Include year, e.g. Best of Mac 2026"></textarea>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Note (things of concern regarding the project)</label>
+            <textarea id="ap-note" placeholder="e.g. collaboration event with other news outlet"></textarea>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>End Date</label>
+            <input type="date" id="ap-followup">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Create Project</button>
+        <div class="form-note">Projects act as folders to store ad campaigns.</div>
+        <div class="form-note">You can edit this information later at any time.</div>
+      </form>
+    </div>
+  </section>
+
+  <!-- PROJECTS LIST -->
+  <section class="view" id="view-projects">
+    <div class="section-title">Projects</div>
+    <div class="client-grid" id="projectsGrid"></div>
+  </section>
+
+  <!-- PROJECT DETAIL -->
+  <section class="view" id="view-project-detail">
+    <span class="back-link" id="backToProjects">&larr; Back to projects</span>
+    <div class="detail-header">
+      <div>
+        <h2 id="project-title-header"></h2>
+        <div class="detail-sub" id="project-sub"></div>
+      </div>
+    </div>
+    <div class="section-title">Ads linked to this project</div>
+    <div id="projectAdsList"></div>
+  </section>
+
   <!-- DIRECTORY -->
   <section class="view" id="view-directory">
     <div class="search-bar">
@@ -174,20 +225,20 @@
 
     <div class="detail-columns">
       <div class="detail-main">
-        <div class="section-title">Campaign / ad history</div>
-        <div id="timelineList"></div>
-        <details class="add-inline" id="addCampaignDetails">
-          <summary>+ Log a new campaign / ad</summary>
+        <div class="section-title">Ad campaigns / projects</div>
+        <div id="adsList"></div>
+        <details class="add-inline" id="addAdDetails">
+          <summary>+ Add a new ad campaign</summary>
           <div class="form-card card shadow padding" style="margin-top:12px;">
-            <form id="campaignForm">
+            <form id="addAdForm">
               <div class="field-row">
-                <div class="field"><label>What ran</label><input type="text" id="c-what" placeholder="e.g. Half-page, Fall Issue"></div>
-                <div class="field"><label>Date</label><input type="date" id="c-date"></div>
+                <div class="field"><label>Ad title</label><input type="text" id="ad-title" placeholder="e.g. Half-page, Fall Issue"></div>
+                <div class="field"><label>Project</label><select id="ad-project"></select></div>
               </div>
               <div class="field-row">
-                <div class="field"><label>Proof / creative file reference</label><input type="text" id="c-proof" placeholder="e.g. StacyMartin_2026_Fall.pdf"></div>
+                <div class="field"><label>Proof / creative file reference</label><input type="text" id="ad-proof" placeholder="e.g. StacyMartin_2026_Fall.pdf"></div>
               </div>
-              <button type="submit" class="btn-primary">Add to timeline</button>
+              <button type="submit" class="btn-primary">Add ad</button>
             </form>
           </div>
         </details>
@@ -203,6 +254,38 @@
           <div id="contactInfo"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- AD DETAIL (status timeline lives here) -->
+  <section class="view" id="view-ad-detail">
+    <span class="back-link" id="backToClientDetail">&larr; Back to client</span>
+    <div class="utility" id="ad-breadcrumb" style="font-size:12px; color:var(--muted); margin-bottom:10px;"></div>
+    <div class="detail-header">
+      <div>
+        <h2 id="ad-title-header"></h2>
+        <div class="detail-sub" id="ad-sub"></div>
+      </div>
+    </div>
+
+    <div class="detail-main">
+      <div class="section-title">Status timeline</div>
+      <div id="adStatusList"></div>
+      <details class="add-inline" id="addStatusDetails" open>
+        <summary>+ Log a status touchpoint</summary>
+        <div class="form-card card shadow padding" style="margin-top:12px;">
+          <form id="addStatusForm">
+            <div class="field-row">
+              <div class="field"><label>Status</label><select id="status-select"></select></div>
+              <div class="field"><label>Date</label><input type="date" id="status-date"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Note (optional)</label><textarea id="status-note" placeholder="e.g. Client asked for a revised proof"></textarea></div>
+            </div>
+            <button type="submit" class="btn-primary">Log touchpoint</button>
+          </form>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -284,6 +367,7 @@
 <script src="js/quickadd.js"></script>
 <script src="js/directory.js"></script>
 <script src="js/detail.js"></script>
+<script src="js/projects.js"></script>
 <script src="js/importexport.js"></script>
 <script src="js/init.js"></script>
 

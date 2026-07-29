@@ -2355,17 +2355,21 @@ nav .collapsible > label {
   }
   nav button{
     font-family: inherit; font-size:15px; padding:10px 22px;
-    border:2px solid var(--ink); cursor:pointer; color:#fff;
+    border:2px solid var(--ink); cursor:pointer; color:#ffffff;
     border-radius:6px; font-weight:600;
     box-shadow: 3px 3px 0 var(--ink);
     transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
     opacity: 0.75;
   }
   nav button[data-view="dashboard"]{ background: #8a7d63; }
-  nav button[data-view="quickadd"]{ background: #8abeb3; }
-  nav button[data-view="directory"]{ background: #333333; }
+  nav button[data-view="quickadd"]{ background: #d2cb3e; }
+  nav button[data-view="addproject"]{ background: #6ad060; }
+  nav button[data-view="directory"]{ background: #ee9816; }
+  nav button[data-view="projects"]{ background: #ec77ea; }
   nav button[data-view="data"]{ background: #a92a2b; }
   nav button[data-view="users"]{ background: #000000; }
+  nav button[data-view="help"]{ background: #78c2fa; }
+
   nav button.active{
     opacity: 1;
     transform: translate(-2px,-2px);

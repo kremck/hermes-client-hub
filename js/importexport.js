@@ -16,6 +16,8 @@ function setSharedImportStatus(message, isError = false)
     status.style.color = isError ? 'var(--red-tab)' : 'var(--green-tab)';
 }
 
+
+/*Please finish this function */
 function setSharedPathView(message, isError = false)
 {
     const status = document.getElementById('sharedPathView');
@@ -43,6 +45,22 @@ function exportClientData()
     downloadLink.click();
     downloadLink.remove();
     URL.revokeObjectURL(url);
+}
+
+function mergeProjects(existingProjects = [], incomingProjects = [])
+{
+    const merged = Array.isArray(existingProjects) ? [...existingProjects] : [];
+    const seenIds = new Set(merged.map((p) => String(p.id)));
+    let addedCount = 0;
+
+    (Array.isArray(incomingProjects) ? incomingProjects : []).forEach((project) => {
+        if (!project || !project.id || seenIds.has(String(project.id))) return;
+        seenIds.add(String(project.id));
+        merged.push(project);
+        addedCount += 1;
+    });
+
+    return { projects: merged, addedCount };
 }
 
 function mergeClients(existingClients = [], incomingClients = [])
