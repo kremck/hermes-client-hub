@@ -64,6 +64,10 @@
   <button class="nav-btn" data-view="directory">Clients</button>
   <button class="nav-btn" data-view="data">Data</button>
   <button class="nav-btn" data-view="users">Users</button>
+  <!--Did this since it's an html page, it would get too cluttered to keep adding javascripts-->
+  <a href="help.html">
+    <button type="button">Help</button>
+  </a>
 </nav>
 
 
@@ -144,6 +148,7 @@
         </div>
         <button type="submit" class="btn-primary">Save client</button>
         <div class="form-note">This takes about 30 seconds, the goal is to capture the lead before you lose it, not fill out every field.</div>
+        <div class="form-note">You can edit this information later at any time.</div>
       </form>
     </div>
   </section>
@@ -208,7 +213,7 @@
       <p style="font-size:14px; color:var(--muted); max-width:520px;">
         This computer keeps its own copy of the client list. To stay in sync with the shared drive,
         <strong>save</strong> a fresh copy there when you're done working, and <strong>load</strong>
-        the shared file when you sit down to work, including at the start of your day.
+        the shared file when you begin work, including at the start of your day.
       </p>
 
       <div class="section-title" style="margin-top:24px;">Automatic shared import</div>
@@ -260,8 +265,7 @@
     <div id="usersList"></div>
 
     <div style="margin-top:24px; font-size:12px; color:var(--muted);">
-      User accounts are loaded from a users file path (currently unset in this mockup,
-      will be pointed at a shared file later). Until then, they're kept on this computer.
+      User accounts are loaded from a users file path. Until then, they're kept on this computer.  Depending on browser permissions, you may need to manually set the path each time.
     </div>
   </section>
 
