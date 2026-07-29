@@ -65,6 +65,58 @@ function collectReminderEvents()
     return events;
 }
 
+function daysAgo(dateStr)
+{
+    if (!dateStr) return null;
+    const target = new Date(dateStr);
+    const today = new Date();
+    target.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+    return Math.round((today - target) / 86400000);
+}
+
+/*Added color coding for different statuses.  I need to change it if it is completed */
+
+function statusColorFor(dateStr)
+{
+    const diff = daysAgo(dateStr);
+    if (diff === null) return 'gray';
+    if (diff >= 7) return 'red';
+    if (diff >= -6) return 'yellow';
+    return 'green';
+}
+
+function collectStatusEvents()
+{
+    const events = [];
+    const clients = visibleClients();
+
+    clients.forEach((client) =>
+    {
+        (client.ads || []).forEach((ad) =>
+        {
+            (ad.statusHistory || []).forEach((entry) =>
+            {
+                if (!entry.occurredAt) return;
+
+                events.push({
+                    tag: 'status',
+                    color: statusColorFor(entry.occurredAt),
+                    who: client.business,
+                    what: `${statusName(entry.statusId)} — ${ad.title}`,
+                    when: entry.occurredAt,
+                    clientId: client.id,
+                    adId: ad.id,
+                    date: entry.occurredAt,
+                    label: `${statusName(entry.statusId)} • ${ad.title}`
+                });
+            });
+        });
+    });
+
+    return events;
+}
+
 function renderCalendar(events)
 {
     const calendarGrid = document.getElementById('calendarGrid');
@@ -148,6 +200,7 @@ function renderCalendar(events)
         const dayDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), dayIndex);
         const dayKey = toLocalDateKey(dayDate);
         const dayEvents = eventsByDate[dayKey] || [];
+        const statusColors = [...new Set(dayEvents.filter((e) => e.tag === 'status').map((e) => e.color))];
         const button = document.createElement('button');
         const isSelected = selectedCalendarDate && toLocalDateKey(selectedCalendarDate) === dayKey;
         const isToday = toLocalDateKey(new Date()) === dayKey;
@@ -167,6 +220,7 @@ function renderCalendar(events)
         button.innerHTML = `
             <span class="calendar-day-number">${dayIndex}</span>
             ${dayEvents.length > 0 ? `<span class="calendar-day-badge">${dayEvents.length}</span>` : ''}
+            ${statusColors.length > 0 ? `<span class="calendar-day-dots">${statusColors.map((c) => `<span class="status-dot" style="background:${c}"></span>`).join('')}</span>` : ''}
         `;
 
         button.addEventListener('click', () =>
@@ -194,12 +248,20 @@ function renderCalendar(events)
         const item = document.createElement('div');
         item.className = 'calendar-event-item';
         item.style.cursor = 'pointer';
+
+        if (event.tag === 'status') {
+            item.classList.add('status-' + event.color);
+        }
+
         item.innerHTML = `
             <div><strong>${escapeHtml(event.who)}</strong></div>
             <div>${escapeHtml(event.what)}</div>
             <div class="detail-sub">${escapeHtml(event.when)}</div>
         `;
-        item.addEventListener('click', () => goToClient(event.clientId));
+        item.addEventListener('click', () => {
+            if (event.adId) { currentClientId = event.clientId; openAdDetail(event.adId); }
+            else { goToClient(event.clientId); }
+        });
         dayList.appendChild(item);
     });
 }
@@ -263,18 +325,30 @@ function renderDashboard()
             const row = document.createElement('div');
             row.className = 'alert-row';
             row.style.cursor = 'pointer';
+
+            const client = data.clients.find((c) => c.id === alert.clientId);
+            const adRows = (client?.ads || []).map((ad) => {
+                const latest = ad.statusHistory && ad.statusHistory.length
+                    ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0]
+                    : null;
+                return `<div class="datefield"><span>${escapeHtml(ad.title)}</span><span class="utility">${latest ? escapeHtml(statusName(latest.statusId)) : 'No status yet'}</span></div>`;
+            }).join('');
+
             row.innerHTML = `
-                <span class="tag ${alert.tag}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : 'Follow up'}</span>
-                <span class="who">${escapeHtml(alert.who)}</span>
-                <span class="what">${escapeHtml(alert.what)}</span>
-                <span class="when">${alert.when}</span>
+                <div style="display:flex; align-items:center; gap:14px; flex:1 1 100%;">
+                    <span class="tag ${alert.tag}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : 'Follow up'}</span>
+                    <span class="who">${escapeHtml(alert.who)}</span>
+                    <span class="what">${escapeHtml(alert.what)}</span>
+                    <span class="when">${alert.when}</span>
+                </div>
+                ${adRows ? `<details class="add-inline" open onclick="event.stopPropagation()" style="flex:1 1 100%;"><summary>Ad statuses</summary>${adRows}</details>` : ''}
             `;
             row.addEventListener('click', () => goToClient(alert.clientId));
             list.appendChild(row);
         });
     }
 
-    renderCalendar(alerts);
+    renderCalendar([...alerts, ...collectStatusEvents()]);
 }
 
 function buildAlerts()

@@ -137,11 +137,12 @@ textarea {
   margin-top: 8px;
 }
 
-.alert-row {
-  grid-template-columns: auto 1fr auto auto;
-  align-items: center;
-  margin-bottom: 8px;
-}
+.alert-row{
+    display:flex; align-items:center; gap:14px;
+    padding:12px 14px; background-color:#f5f5f5;
+    margin-bottom:8px;
+    flex-wrap: wrap;
+  }
 
 .tag {
   display: inline-block;
@@ -295,6 +296,25 @@ textarea {
 .calendar-event-item:hover {
   background: #f7f7f7;
 }
+
+/*color coded calendar statuses*/
+
+.calendar-day-dots{
+  display:flex;
+  gap:3px;
+  justify-content:center;
+  margin-top:2px;
+}
+.status-dot{
+  display:inline-block;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+}
+
+.calendar-event-item.status-red{ border-left: 4px solid #d64545; padding-left: 10px; }
+.calendar-event-item.status-yellow{ border-left: 4px solid #baa532; padding-left: 10px; }
+.calendar-event-item.status-green{ border-left: 4px solid #4a9d5f; padding-left: 10px; }
 
 .calendar-day-empty {
   color: var(--muted);
