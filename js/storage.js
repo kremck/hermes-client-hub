@@ -7,7 +7,9 @@ function loadData() {
 
     if (raw) {
         const parsed = JSON.parse(raw);
-        if (!Array.isArray(parsed.projects)) parsed.projects = [];
+        if (!Array.isArray(parsed.projects)) {
+            parsed.projects = [];
+        }
         return parsed;
     }
 

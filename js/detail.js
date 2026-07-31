@@ -117,19 +117,89 @@ function renderContact(){
     });
 }
 
-function renderKeyDates(){
-    const keyDatesList = document.getElementById('keyDatesList');
+function renderKeyDates() {
+    const keyDatesList = document.getElementById("keyDatesList");
     if (!keyDatesList || !currentClientId) return;
-    const client = data.clients.find((entry) => entry.id === currentClientId);
+
+    const client = data.clients.find(entry => entry.id === currentClientId);
     if (!client) return;
-    keyDatesList.innerHTML = '';
-    if (!client.keyDates || client.keyDates.length === 0) { keyDatesList.innerHTML = '<div class="empty">No key dates on file.</div>'; return; }
-    client.keyDates.forEach((keyDate) => {
-        const row = document.createElement('div');
-        row.className = 'datefield';
-        row.innerHTML = `<span>${escapeHtml(keyDate.label)}</span><span class="utility">${keyDate.date}</span>`;
-        keyDatesList.appendChild(row);
-    });
+
+    client.keyDates = client.keyDates || [];
+
+    keyDatesList.innerHTML = "";
+
+    // Existing key dates
+    if (client.keyDates.length === 0) {
+        keyDatesList.innerHTML = `
+            <div class="empty">
+                No key dates yet.
+            </div>
+        `;
+    } else {
+        client.keyDates.forEach((keyDate) => {
+            const row = document.createElement("div");
+            row.className = "datefield";
+
+            row.innerHTML = `
+                <span>${escapeHtml(keyDate.label)}</span>
+                <span class="utility">${keyDate.date}</span>
+            `;
+
+            keyDatesList.appendChild(row);
+        });
+    }
+
+    // Add-new section
+    const addRow = document.createElement("div");
+    addRow.style.marginTop = "15px";
+
+    addRow.innerHTML = `
+        <input
+            id="newKeyDateTitle"
+            type="text"
+            placeholder="Title"
+            style="width:100%; margin-bottom:8px;"
+        >
+
+        <input
+            id="newKeyDateDate"
+            type="date"
+            style="width:100%; margin-bottom:8px;"
+        >
+
+        <button
+            id="addKeyDateBtn"
+            type="button"
+            class="btn-primary"
+        >
+            Add Key Date
+        </button>
+    `;
+
+    keyDatesList.appendChild(addRow);
+
+    document.getElementById("addKeyDateBtn").onclick = () => {
+
+        const label = document.getElementById("newKeyDateTitle").value.trim();
+        const date = document.getElementById("newKeyDateDate").value;
+
+        if (!label || !date) {
+            alert("Enter both a title and date.");
+            return;
+        }
+
+        client.keyDates.push({
+            label,
+            date
+        });
+
+        /*printing here to check */
+
+        console.log(client.keyDates);
+
+        saveData(data);
+        renderKeyDates();
+    };
 }
 
 function renderCampaignHistory(){ renderAdsList(); renderContact(); renderKeyDates(); }
@@ -240,6 +310,75 @@ function setupAddStatusEntry(){
     };
 }
 
+function renderAdInfo(){
+    const client = data.clients.find((entry) => entry.id === currentClientId);
+    const ad = client?.ads.find((entry) => entry.id === currentAdId);
+    const infoBox = document.getElementById('adInfoBox');
+    if (!infoBox || !ad) return;
+
+    const projectOptions = ['<option value="">No project</option>']
+        .concat(data.projects.map((p) => `<option value="${p.id}" ${p.id === ad.projectId ? 'selected' : ''}>${escapeHtml(p.name)}</option>`))
+        .join('');
+
+    infoBox.innerHTML = `
+        <span>Edit Ad</span>
+        <div class="datefield">
+            <span>Title</span>
+            <span class="editable-ad" data-field="title">${escapeHtml(ad.title || '—')}</span>
+        </div>
+        <div class="datefield">
+            <span>Project</span>
+            <select id="ad-project-edit">${projectOptions}</select>
+        </div>
+        <div class="datefield">
+            <span>Proof</span>
+            <span class="editable-ad" data-field="proof">${escapeHtml(ad.proof || '—')}</span>
+        </div>
+        <div class="datefield" style="margin-top:10px; border-bottom:none; justify-content:flex-end;">
+            <button type="button" class="btn-secondary-outline btn-small" id="deleteAdBtn">Delete ad</button>
+        </div>
+    `;
+
+    infoBox.querySelectorAll('.editable-ad').forEach((field) => {
+        field.addEventListener('click', () => {
+            const currentValue = field.textContent.trim();
+            const nextValue = prompt('Update this field:', currentValue === '—' ? '' : currentValue);
+            if (nextValue === null) return;
+
+            const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
+            const adEntry = clientEntry?.ads.find((entry) => entry.id === currentAdId);
+            if (!adEntry) return;
+
+            adEntry[field.getAttribute('data-field')] = nextValue.trim();
+            saveData(data);
+            renderAdInfo();
+            document.getElementById('ad-title-header').textContent = adEntry.title;
+        });
+    });
+
+    document.getElementById('ad-project-edit')?.addEventListener('change', (event) => {
+        const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
+        const adEntry = clientEntry?.ads.find((entry) => entry.id === currentAdId);
+        if (!adEntry) return;
+
+        adEntry.projectId = event.target.value || null;
+        saveData(data);
+
+        const project = data.projects.find((p) => p.id === adEntry.projectId);
+        document.getElementById('ad-sub').textContent = project ? project.name : 'No project assigned';
+    });
+
+    document.getElementById('deleteAdBtn')?.addEventListener('click', () => {
+        const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
+        if (!clientEntry) return;
+        if (!confirm(`Delete "${ad.title}"? This cannot be undone.`)) return;
+
+        clientEntry.ads = clientEntry.ads.filter((entry) => entry.id !== currentAdId);
+        saveData(data);
+        backToClientDetail();
+    });
+}
+
 function openAdDetail(adId){
     currentAdId = adId;
     const client = data.clients.find((entry) => entry.id === currentClientId);
@@ -251,6 +390,7 @@ function openAdDetail(adId){
     document.getElementById('ad-sub').textContent = project ? project.name : 'No project assigned';
     document.getElementById('ad-breadcrumb').textContent = `Clients > ${client.business} > ${ad.title}`;
 
+    renderAdInfo();
     setupAddStatusEntry();
     renderAdStatusTimeline();
 
