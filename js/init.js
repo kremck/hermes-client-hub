@@ -10,4 +10,3 @@ data = loadData();
 users = loadUsers();
 
 tryRestoreSession();
-autoImportFromSharedFolder();

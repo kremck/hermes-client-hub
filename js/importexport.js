@@ -2,49 +2,184 @@
    Import/Export (js/importexport.js)
    =========================== */
 
-let sharedImportFolderHandle = null;
-let sharedImportFolderName = '';
-
-function setSharedImportStatus(message, isError = false)
+function setStatusMessage(elementId, message, isError = false)
 {
-    const status = document.getElementById('sharedImportStatus');
-
-    if (!status)
-        return;
-
-    status.textContent = message;
-    status.style.color = isError ? 'var(--red-tab)' : 'var(--green-tab)';
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = isError ? 'var(--red-tab)' : 'var(--green-tab)';
 }
 
+/* ---------- EXPORT ---------- */
 
-/*Please finish this function */
-function setSharedPathView(message, isError = false)
+function filterDataByMonthYear(sourceData, month, year)
 {
-    const status = document.getElementById('sharedPathView');
+    if (!month && !year) return sourceData;
 
-    if (!status)
-        return;
+    const filteredClients = (sourceData.clients || []).map((client) => {
+        const filteredAds = (client.ads || []).filter((ad) => {
+            return (ad.statusHistory || []).some((entry) => {
+                if (!entry.occurredAt) return false;
+                const d = new Date(entry.occurredAt);
+                const matchesYear = year ? d.getFullYear() === parseInt(year, 10) : true;
+                const matchesMonth = month ? (d.getMonth() + 1) === parseInt(month, 10) : true;
+                return matchesYear && matchesMonth;
+            });
+        });
 
-    status.textContent = message;
-    status.style.color = isError ? 'var(--red-tab)' : 'var(--green-tab)';
+        if (filteredAds.length === 0) return null;
+        return { ...client, ads: filteredAds };
+    }).filter(Boolean);
+
+    return { ...sourceData, clients: filteredClients };
 }
 
 function exportClientData()
 {
-    if (!data)
+    if (!data) return;
+
+    const monthSelect = document.getElementById('export-month');
+    const yearSelect = document.getElementById('export-year');
+    const month = monthSelect ? monthSelect.value : '';
+    const year = yearSelect ? yearSelect.value : '';
+
+    try
+    {
+        const exportPayload = filterDataByMonthYear(data, month, year);
+
+        if ((month || year) && (!exportPayload.clients || exportPayload.clients.length === 0))
+        {
+            setStatusMessage('exportStatus', 'No ads found matching that month/year. Nothing was exported.', true);
+            return;
+        }
+
+        const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+
+        let stamp;
+        if (month && year) stamp = `${year}-${String(month).padStart(2, '0')}`;
+        else if (year) stamp = `${year}`;
+        else if (month) stamp = `all-years-month-${String(month).padStart(2, '0')}`;
+        else stamp = new Date().toISOString().slice(0, 10);
+
+        const filename = `client-hub-export_${stamp}.json`;
+
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        URL.revokeObjectURL(url);
+
+        setStatusMessage('exportStatus', `Saved ${filename}`);
+    }
+    catch (error)
+    {
+        setStatusMessage('exportStatus', `Export failed: ${error.message}`, true);
+    }
+}
+
+function populateExportYearOptions()
+{
+    const yearSelect = document.getElementById('export-year');
+    if (!yearSelect) return;
+
+    const yearsInData = new Set();
+    (data?.clients || []).forEach((client) => {
+        (client.ads || []).forEach((ad) => {
+            (ad.statusHistory || []).forEach((entry) => {
+                if (entry.occurredAt) yearsInData.add(new Date(entry.occurredAt).getFullYear());
+            });
+        });
+    });
+
+    const currentYear = new Date().getFullYear();
+    yearsInData.add(currentYear);
+
+    const sortedYears = [...yearsInData].sort((a, b) => b - a);
+
+    yearSelect.innerHTML = '<option value="">Any year</option>' +
+        sortedYears.map((y) => `<option value="${y}">${y}</option>`).join('');
+}
+
+/* ---------- IMPORT (full replace) ---------- */
+
+async function importClientData()
+{
+    const fileInput = document.getElementById('importFile');
+
+    if (!fileInput)
         return;
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const downloadLink = document.createElement('a');
-    const stamp = new Date().toISOString().slice(0, 10);
+    const file = fileInput.files[0];
 
-    downloadLink.href = url;
-    downloadLink.download = `client-hub-backup_${stamp}.json`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    downloadLink.remove();
-    URL.revokeObjectURL(url);
+    if (!file)
+    {
+        setStatusMessage('importStatus', 'Choose a file first.', true);
+        return;
+    }
+
+    if (!confirm('This will completely replace all current data with the contents of this file. This cannot be undone. Continue?'))
+    {
+        setStatusMessage('importStatus', 'Import cancelled.', true);
+        return;
+    }
+
+    try
+    {
+        const parsed = JSON.parse(await file.text());
+
+        if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.clients))
+        {
+            throw new Error('This file does not look like a valid Client Hub backup.');
+        }
+
+        data = parsed;
+        if (!Array.isArray(data.projects)) data.projects = [];
+        saveData(data);
+
+        renderDashboard();
+        renderDirectory();
+        populateExportYearOptions();
+
+        setStatusMessage('importStatus', `Loaded ${data.clients.length} client(s) from ${file.name}. Local data was replaced.`);
+    }
+    catch (error)
+    {
+        setStatusMessage('importStatus', `Could not import that file: ${error.message}`, true);
+    }
+}
+
+/* ---------- MERGE (two files -> new downloaded file, does not touch live data) ---------- */
+
+function mergeClients(existingClients = [], incomingClients = [])
+{
+    const merged = Array.isArray(existingClients) ? [...existingClients] : [];
+    const seenIds = new Set(merged.filter((entry) => entry && entry.id).map((entry) => String(entry.id)));
+    let addedCount = 0;
+
+    (Array.isArray(incomingClients) ? incomingClients : []).forEach((client) =>
+    {
+        if (!client || typeof client !== 'object') return;
+
+        const clientId = client.id ? String(client.id) : '';
+
+        if (!clientId)
+        {
+            merged.push(client);
+            addedCount += 1;
+            return;
+        }
+
+        if (seenIds.has(clientId)) return;
+
+        seenIds.add(clientId);
+        merged.push(client);
+        addedCount += 1;
+    });
+
+    return { clients: merged, addedCount };
 }
 
 function mergeProjects(existingProjects = [], incomingProjects = [])
@@ -63,249 +198,83 @@ function mergeProjects(existingProjects = [], incomingProjects = [])
     return { projects: merged, addedCount };
 }
 
-function mergeClients(existingClients = [], incomingClients = [])
+async function readJsonFile(fileInputId)
 {
-    const merged = Array.isArray(existingClients) ? [...existingClients] : [];
-    const seenIds = new Set(merged.filter((entry) => entry && entry.id).map((entry) => String(entry.id)));
-    let addedCount = 0;
+    const fileInput = document.getElementById(fileInputId);
+    const file = fileInput?.files[0];
 
-    (Array.isArray(incomingClients) ? incomingClients : []).forEach((client) =>
+    if (!file) return null;
+
+    const parsed = JSON.parse(await file.text());
+    return { parsed, name: file.name };
+}
+
+async function mergeFiles()
+{
+    try
     {
-        if (!client || typeof client !== 'object')
-            return;
+        const targetFile = await readJsonFile('mergeTargetFile');
+        const otherFile = await readJsonFile('mergeOtherFile');
 
-        const clientId = client.id ? String(client.id) : '';
-
-        if (!clientId)
+        if (!targetFile)
         {
-            merged.push(client);
-            addedCount += 1;
+            setStatusMessage('mergeStatus', 'Choose a target file first.', true);
             return;
         }
 
-        if (seenIds.has(clientId))
+        if (!otherFile)
+        {
+            setStatusMessage('mergeStatus', 'Choose a second file to merge in.', true);
             return;
+        }
 
-        seenIds.add(clientId);
-        merged.push(client);
-        addedCount += 1;
-    });
+        const targetData = targetFile.parsed;
+        const otherData = otherFile.parsed;
 
-    return { clients: merged, addedCount };
-}
+        if (!targetData || !Array.isArray(targetData.clients))
+        {
+            throw new Error(`${targetFile.name} does not look like a valid backup.`);
+        }
 
-function mergeUsers(existingUsers = [], incomingUsers = [])
-{
-    const merged = Array.isArray(existingUsers) ? [...existingUsers] : [];
-    const seenNames = new Set(merged.filter((entry) => entry && entry.name).map((entry) => String(entry.name).trim().toLowerCase()));
-    let addedCount = 0;
+        if (!otherData || !Array.isArray(otherData.clients))
+        {
+            throw new Error(`${otherFile.name} does not look like a valid backup.`);
+        }
 
-    (Array.isArray(incomingUsers) ? incomingUsers : []).forEach((user) =>
-    {
-        if (!user || typeof user !== 'object')
-            return;
+        const clientMerge = mergeClients(targetData.clients, otherData.clients);
+        const projectMerge = mergeProjects(targetData.projects || [], otherData.projects || []);
 
-        const name = typeof user.name === 'string' ? user.name.trim() : '';
+        const mergedData = {
+            ...targetData,
+            clients: clientMerge.clients,
+            projects: projectMerge.projects
+        };
 
-        if (!name)
-            return;
+        const blob = new Blob([JSON.stringify(mergedData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        const stamp = new Date().toISOString().slice(0, 10);
+        const filename = `client-hub-merged_${stamp}.json`;
 
-        const normalizedName = name.toLowerCase();
+        downloadLink.href = url;
+        downloadLink.download = filename;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        URL.revokeObjectURL(url);
 
-        if (seenNames.has(normalizedName))
-            return;
-
-        seenNames.add(normalizedName);
-        merged.push({ ...user, name });
-        addedCount += 1;
-    });
-
-    return { users: merged, addedCount };
-}
-
-async function applyImportedData(parsed, sourceLabel)
-{
-    if (!parsed || typeof parsed !== 'object')
-    {
-        throw new Error('The selected file is empty or invalid.');
-    }
-
-    const baseData = data && typeof data === 'object' ? { ...data } : {};
-    const incomingClients = Array.isArray(parsed.clients) ? parsed.clients : [];
-    const incomingUsers = Array.isArray(parsed.users) ? parsed.users : [];
-
-    if (!incomingClients.length && !incomingUsers.length)
-    {
-        throw new Error('This backup does not contain any client or user data to merge.');
-    }
-
-    const clientMerge = mergeClients(baseData.clients || [], incomingClients);
-    const userMerge = mergeUsers(users || [], incomingUsers);
-
-    data = {
-        ...baseData,
-        ...parsed,
-        clients: clientMerge.clients
-    };
-
-    saveData(data);
-
-    if (userMerge.addedCount > 0)
-    {
-        users = userMerge.users;
-        saveUsers(users);
-    }
-
-    const status = document.getElementById('importStatus');
-    const sourceText = sourceLabel ? ` from ${sourceLabel}` : '';
-    const summaryParts = [];
-
-    if (clientMerge.addedCount > 0)
-        summaryParts.push(`${clientMerge.addedCount} new client(s)`);
-
-    if (userMerge.addedCount > 0)
-        summaryParts.push(`${userMerge.addedCount} new user(s)`);
-
-    const summary = summaryParts.length > 0 ? summaryParts.join(' and ') : 'no new records';
-
-    if (status)
-    {
-        status.textContent = `Merged ${summary}${sourceText}. Existing local records were kept.`;
-        status.style.color = 'var(--green-tab)';
-    }
-
-    renderDashboard();
-    renderDirectory();
-    populateLoginDropdown();
-    renderUsersList();
-}
-
-async function importClientData()
-{
-    const fileInput = document.getElementById('importFile');
-    const status = document.getElementById('importStatus');
-
-    if (!fileInput || !status)
-        return;
-
-    const file = fileInput.files[0];
-
-    if (!file)
-    {
-        status.textContent = 'Choose a file first.';
-        status.style.color = 'var(--red-tab)';
-        return;
-    }
-
-    try
-    {
-        const parsed = JSON.parse(await file.text());
-        await applyImportedData(parsed, file.name);
+        setStatusMessage('mergeStatus', `Saved ${filename} — added ${clientMerge.addedCount} new client(s) and ${projectMerge.addedCount} new project(s) from ${otherFile.name} into ${targetFile.name}.`);
     }
     catch (error)
     {
-        status.textContent = `Could not read that file: ${error.message}`;
-        status.style.color = 'var(--red-tab)';
+        setStatusMessage('mergeStatus', `Merge failed: ${error.message}`, true);
     }
 }
 
-async function pickSharedImportFolder()
-{
-    if (typeof window.showDirectoryPicker !== 'function')
-    {
-        setSharedImportStatus('This browser does not support selecting a shared folder automatically. Use the manual import button instead.', true);
-        return;
-    }
+/* ---------- Wire up buttons ---------- */
 
-    try
-    {
-        const handle = await window.showDirectoryPicker({ mode: 'read' });
-        sharedImportFolderHandle = handle;
-        sharedImportFolderName = handle.name || 'shared folder';
+document.getElementById('exportBtn')?.addEventListener('click', exportClientData);
+document.getElementById('importBtn')?.addEventListener('click', importClientData);
+document.getElementById('mergeBtn')?.addEventListener('click', mergeFiles);
 
-        setSharedImportStatus(`Shared folder selected: ${sharedImportFolderName}. Checking it for client data now.`, false);
-        await autoImportFromSharedFolder();
-    }
-    catch (error)
-    {
-        if (error && error.name !== 'AbortError')
-        {
-            setSharedImportStatus(`Could not open the shared folder: ${error.message}`, true);
-        }
-    }
-}
-
-async function autoImportFromSharedFolder()
-{
-    if (!sharedImportFolderHandle)
-        return;
-
-    const candidateNames = ['client-hub-backup.json', 'clients.json', 'client-data.json'];
-
-    for (const fileName of candidateNames)
-    {
-        try
-        {
-            const fileHandle = await sharedImportFolderHandle.getFileHandle(fileName, { create: false });
-            const file = await fileHandle.getFile();
-            const parsed = JSON.parse(await file.text());
-
-            await applyImportedData(parsed, sharedImportFolderName ? `${sharedImportFolderName}/${fileName}` : fileName);
-            setSharedImportStatus(`Imported ${data.clients.length} client(s) from ${sharedImportFolderName}/${fileName}.`, false);
-            return;
-        }
-        catch (error)
-        {
-            // Keep trying the next file name.
-        }
-    }
-
-    try
-    {
-        const jsonFiles = [];
-
-        for await (const [name, handle] of sharedImportFolderHandle.entries())
-        {
-            if (handle.kind === 'file' && name.toLowerCase().endsWith('.json'))
-            {
-                jsonFiles.push({ name, handle });
-            }
-        }
-
-        if (jsonFiles.length > 0)
-        {
-            const firstFile = jsonFiles[0];
-            const file = await firstFile.handle.getFile();
-            const parsed = JSON.parse(await file.text());
-
-            await applyImportedData(parsed, sharedImportFolderName ? `${sharedImportFolderName}/${firstFile.name}` : firstFile.name);
-            setSharedImportStatus(`Imported ${data.clients.length} client(s) from ${sharedImportFolderName}/${firstFile.name}.`, false);
-            return;
-        }
-    }
-    catch (error)
-    {
-        // No fallback file available.
-    }
-
-    setSharedImportStatus('No supported client backup file was found in the selected shared folder.', true);
-}
-
-const exportButton = document.getElementById('exportBtn');
-const importButton = document.getElementById('importBtn');
-const pickSharedFolderButton = document.getElementById('chooseSharedFolderBtn');
-
-if (exportButton)
-{
-    exportButton.addEventListener('click', exportClientData);
-}
-
-if (importButton)
-{
-    importButton.addEventListener('click', importClientData);
-}
-
-if (pickSharedFolderButton)
-{
-    pickSharedFolderButton.addEventListener('click', pickSharedImportFolder);
-}
+populateExportYearOptions();
