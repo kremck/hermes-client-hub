@@ -130,76 +130,111 @@ function renderKeyDates() {
 
     // Existing key dates
     if (client.keyDates.length === 0) {
-        keyDatesList.innerHTML = `
-            <div class="empty">
-                No key dates yet.
-            </div>
-        `;
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No key dates yet.";
+        keyDatesList.appendChild(empty);
     } else {
-        client.keyDates.forEach((keyDate) => {
+        client.keyDates.forEach((keyDate, index) => {
             const row = document.createElement("div");
             row.className = "datefield";
 
             row.innerHTML = `
-                <span>${escapeHtml(keyDate.label)}</span>
-                <span class="utility">${keyDate.date}</span>
+                <span class="utility editable-keydate-label" data-index="${index}">
+                    ${escapeHtml(keyDate.label)}
+                </span>
+
+                <span class="utility editable-keydate-date" data-index="${index}">
+                    ${keyDate.date}
+                </span>
             `;
 
             keyDatesList.appendChild(row);
         });
     }
 
-    // Add-new section
-    const addRow = document.createElement("div");
-    addRow.style.marginTop = "15px";
+    // Add new key date form
+    const form = document.createElement("form");
+    form.id = "addKeyDateForm";
+    form.style.marginTop = "15px";
 
-    addRow.innerHTML = `
-        <input
-            id="newKeyDateTitle"
-            type="text"
-            placeholder="Title"
-            style="width:100%; margin-bottom:8px;"
-        >
+    form.innerHTML = `
+        <div class="field">
+            <label>Title</label>
+            <input type="text" id="newKeyDateTitle">
+        </div>
 
-        <input
-            id="newKeyDateDate"
-            type="date"
-            style="width:100%; margin-bottom:8px;"
-        >
+        <div class="field">
+            <label>Date</label>
+            <input type="date" id="newKeyDateDate">
+        </div>
 
-        <button
-            id="addKeyDateBtn"
-            type="button"
-            class="btn-primary"
-        >
-            Add Key Date
+        <button type="submit" class="btn-primary">
+            Submit
         </button>
     `;
 
-    keyDatesList.appendChild(addRow);
+    keyDatesList.appendChild(form);
 
-    document.getElementById("addKeyDateBtn").onclick = () => {
+    // Submit new key date
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
 
         const label = document.getElementById("newKeyDateTitle").value.trim();
         const date = document.getElementById("newKeyDateDate").value;
 
-        if (!label || !date) {
-            alert("Enter both a title and date.");
-            return;
-        }
+        if (!label || !date) return;
 
         client.keyDates.push({
             label,
             date
         });
 
-        /*printing here to check */
-
-        console.log(client.keyDates);
-
         saveData(data);
         renderKeyDates();
-    };
+    });
+
+    // Edit title
+    keyDatesList.querySelectorAll(".editable-keydate-label").forEach(field => {
+        field.addEventListener("click", () => {
+
+            const index = Number(field.dataset.index);
+
+            const value = prompt(
+                "Key date title:",
+                client.keyDates[index].label
+            );
+
+            if (value === null) return;
+
+            client.keyDates[index].label = value.trim();
+
+            saveData(data);
+            renderKeyDates();
+        });
+    });
+
+    // Edit date
+    keyDatesList.querySelectorAll(".editable-keydate-date").forEach(field => {
+
+        field.addEventListener("click", () => {
+
+            const index = Number(field.dataset.index);
+
+            const value = prompt(
+                "Key date:",
+                client.keyDates[index].date
+            );
+
+            if (value === null) return;
+
+            client.keyDates[index].date = value;
+
+            saveData(data);
+            renderKeyDates();
+        });
+
+    });
 }
 
 function renderCampaignHistory(){ renderAdsList(); renderContact(); renderKeyDates(); }
