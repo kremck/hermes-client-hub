@@ -367,7 +367,7 @@ function renderAdInfo(){
         </div>
         <div class="datefield">
             <span>Proof</span>
-            <span class="editable-ad" data-field="proof">${escapeHtml(ad.proof || '—')}</span>
+            <span class="editable-ad" data-field="proof">${escapeHtml(ad.proof || 'link_to_proof_example.pdf')}</span>
         </div>
         <div class="datefield" style="margin-top:10px; border-bottom:none; justify-content:flex-end;">
             <button type="button" class="btn-secondary-outline btn-small" id="deleteAdBtn">Delete ad</button>

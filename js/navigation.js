@@ -62,7 +62,7 @@ function backToDirectory()
     showView('directory');
 }
 
-/*in details.js
+/*in detail.js
 function backToClientDetail()
 {
     showView('client-detail');
