@@ -4,6 +4,7 @@
   --muted: #6c757d;
   --blue-tab: #0b74d5;
   --brass-dark: #8a5a00;
+  --orange-tab: #f08c00;
 }
 
 html, body {
@@ -331,10 +332,7 @@ textarea {
   .alert-row { grid-template-columns: 1fr; }
   .dashboard-columns { grid-template-columns: 1fr; }
 }
-  margin: 0 0 -1px;
-  padding: 0.75rem;
-  text-align: center;
-}
+
 .collapsible > label:hover {
   color: #41403e;
   color: var(--muted);
@@ -2430,6 +2428,7 @@ nav .collapsible > label {
   }
   .tag.due{ background: var(--red-tab); }
   .tag.upcoming{ background: var(--brass); }
+  .tag.overdue{ background: var(--orange-tab); }
   .tag.followup{ background: var(--blue-tab); }
   .alert-row .who{ font-weight:600; flex:1; }
   .alert-row .what{ color:var(--muted); flex:2; font-size:14px; }

@@ -14,6 +14,17 @@ function toLocalDateKey(date)
     return `${year}-${month}-${day}`;
 }
 
+const keyDateTagRules = {
+    overdue: (days) => days < 0,
+    due: (days) => days <= 7,
+    upcoming: (days) => days <= 30
+};
+
+function getKeyDateTag(days)
+{
+    return Object.keys(keyDateTagRules).find((tag) => keyDateTagRules[tag](days)) || 'upcoming';
+}
+
 function collectReminderEvents()
 {
     const events = [];
@@ -25,10 +36,10 @@ function collectReminderEvents()
         {
             const days = daysUntil(keyDate.date);
 
-            if (days !== null && days <= 30 && days >= 0)
+            if (days !== null && days <= 30)
             {
                 events.push({
-                    tag: days <= 7 ? 'due' : 'upcoming',
+                    tag: getKeyDateTag(days),
                     who: client.business,
                     what: keyDate.label,
                     when: formatWhen(days),
@@ -331,15 +342,17 @@ function renderDashboard()
                 const latest = ad.statusHistory && ad.statusHistory.length
                     ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0]
                     : null;
-                return `<div class="datefield"><span>${escapeHtml(ad.title)}</span><span class="utility">${latest ? escapeHtml(statusName(latest.statusId)) : 'No status yet'}</span></div>`;
+                const statusText = latest ? statusName(latest.statusId) : 'No status yet';
+                const ageText = latest && latest.occurredAt ? ` · ${formatWhen(daysUntil(latest.occurredAt))}` : '';
+                return `<div class="datefield"><span>${escapeHtml(ad.title)}</span><span class="utility">${escapeHtml(statusText + ageText)}</span></div>`;
             }).join('');
 
             row.innerHTML = `
                 <div style="display:flex; align-items:center; gap:14px; flex:1 1 100%;">
-                    <span class="tag ${alert.tag}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : 'Follow up'}</span>
+                    <span class="tag ${alert.tag}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : alert.tag === 'overdue' ? 'Overdue' : 'Follow up'}</span>
                     <span class="who">${escapeHtml(alert.who)}</span>
                     <span class="what">${escapeHtml(alert.what)}</span>
-                    <span class="when">${alert.when}</span>
+                    
                 </div>
                 ${adRows ? `<details class="add-inline" open onclick="event.stopPropagation()" style="flex:1 1 100%;"><summary>Ad statuses</summary>${adRows}</details>` : ''}
             `;
@@ -350,6 +363,12 @@ function renderDashboard()
 
     renderCalendar([...alerts, ...collectStatusEvents()]);
 }
+
+/*removed this line from the row.innerHTML above:
+
+<span class="when">${alert.when}</span>
+
+*/
 
 function buildAlerts()
 {
