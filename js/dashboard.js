@@ -7,9 +7,17 @@ let selectedCalendarDate = null;
 
 function toLocalDateKey(date)
 {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    if (window.dateUtils && typeof dateUtils.toLocalDateKey === 'function') {
+        return dateUtils.toLocalDateKey(date);
+    }
+
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d)) return null;
+    d.setHours(0,0,0,0);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
 }
@@ -78,8 +86,13 @@ function collectReminderEvents()
 
 function daysAgo(dateStr)
 {
+    if (window.dateUtils && typeof dateUtils.daysAgoSafe === 'function') {
+        return dateUtils.daysAgoSafe(dateStr);
+    }
+
     if (!dateStr) return null;
     const target = new Date(dateStr);
+    if (isNaN(target)) return null;
     const today = new Date();
     target.setHours(0,0,0,0);
     today.setHours(0,0,0,0);

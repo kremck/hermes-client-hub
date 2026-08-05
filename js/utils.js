@@ -22,14 +22,20 @@ function pastDate(daysAgo)
 
 function daysUntil(dateStr)
 {
+    if (window.dateUtils && typeof dateUtils.daysUntilSafe === 'function') {
+        return dateUtils.daysUntilSafe(dateStr);
+    }
+
     if (!dateStr)
         return null;
 
     const target = new Date(dateStr + "T00:00:00");
+    if (isNaN(target))
+        return null;
 
     const today = new Date();
-
     today.setHours(0, 0, 0, 0);
+    target.setHours(0, 0, 0, 0);
 
     return Math.round(
         (target - today) / (1000 * 60 * 60 * 24)
