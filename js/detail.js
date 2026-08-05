@@ -248,7 +248,7 @@ function openDetail(id){
     if (!client) return;
     document.getElementById('d-business').textContent = client.business;
     document.getElementById('d-sub').textContent = `${client.relationship || 'Client'}${client.businessType ? ' · ' + client.businessType : ''} · ${client.contact || 'No contact name on file'}`;
-    document.getElementById('addAdDetails').style.display = currentUser?.role === 'graphics' ? 'none' : '';
+    document.getElementById('addAdDetails').style.display = '';
     setupAddAd();
     renderCampaignHistory();
     document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));

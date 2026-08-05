@@ -21,7 +21,7 @@ function createClientCard(client)
         <span class="cat">${escapeHtml(client.relationship || client.businessType || 'Client')}</span>
         <div class="biz">${escapeHtml(client.business)}</div>
         <div class="contact">${escapeHtml(client.contact || ', ')}</div>
-        ${currentUser && currentUser.role === 'graphics' ? `<div class="contact" style="font-style:italic;">Rep: ${escapeHtml(client.owner || 'Unassigned')}</div>` : ''}
+        <div class="contact" style="font-style:italic;">Rep: ${escapeHtml(client.owner || 'Unassigned')}</div>
         <div class="meta"><span>${(client.ads || []).length} project(s)</span><span>${(client.keyDates || []).length} key date(s)</span></div>
         ${adRows ? `<details class="add-inline" onclick="event.stopPropagation()"><summary>Ad statuses</summary>${adRows}</details>` : ''}
     `;

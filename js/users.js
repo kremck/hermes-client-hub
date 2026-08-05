@@ -18,7 +18,7 @@ function populateLoginDropdown(){
     users.forEach((user) => {
         const option = document.createElement('option');
         option.value = user.name;
-        option.textContent = `${user.name} (${user.role === 'graphics' ? 'Graphics' : 'Sales'})`;
+        option.textContent = `${user.name} (Sales)`;
         select.appendChild(option);
     });
 }
@@ -32,7 +32,7 @@ function renderUsersList(){
         const row = document.createElement('div');
         row.className = 'alert-row';
         row.innerHTML = `
-            <span class="tag ${user.role === 'graphics' ? 'followup' : 'upcoming'}">${user.role === 'graphics' ? 'Graphics' : 'Sales'}</span>
+            <span class="tag upcoming">Sales</span>
             <span class="who">${escapeHtml(user.name)}</span>
             <span class="what"></span>
             <button type="button" class="btn-secondary-outline btn-small" data-delete-user="${index}">Delete</button>
@@ -54,7 +54,7 @@ function registerUser(){
     document.getElementById('registerUserForm')?.addEventListener('submit', (event) => {
         event.preventDefault();
         const name = document.getElementById('ru-name').value.trim();
-        const role = document.getElementById('ru-role').value;
+        const role = 'sales';
 
         document.getElementById('ru-name').value = '';
         
@@ -68,7 +68,7 @@ function quickRegister(){
     document.getElementById('quickRegisterForm')?.addEventListener('submit', (event) => {
         event.preventDefault();
         const name = document.getElementById('qr-name').value.trim();
-        const role = document.getElementById('qr-role').value;
+        const role = 'sales';
         if (!name) return;
         if (users.some((entry) => entry.name.toLowerCase() === name.toLowerCase())) { alert('That user is already registered.'); return; }
         users.push({ name, role }); saveUsers(users); populateLoginDropdown(); renderUsersList(); currentUser = { name, role }; sessionStorage.setItem('clientHubUser', JSON.stringify(currentUser)); enterApp(); event.target.reset();

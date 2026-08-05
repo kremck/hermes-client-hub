@@ -127,7 +127,7 @@ function loadUsers() {
 
         {
             name: "Casey Lin",
-            role: "graphics"
+            role: "sales"
         }
 
     ];

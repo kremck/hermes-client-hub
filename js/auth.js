@@ -14,19 +14,18 @@ async function tryRestoreSession(){
 function enterApp(){
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appShell').style.display = 'block';
-    document.getElementById('userBadge').textContent = `${currentUser.name} · ${currentUser.role === 'graphics' ? 'Graphics' : 'Sales'}`;
+    document.getElementById('userBadge').textContent = `${currentUser.name} · Sales`;
     applyRolePermissions();
     showView('dashboard');
 }
 
 function applyRolePermissions(){
     const quickAddNav = document.getElementById('navQuickAdd');
-    if (quickAddNav && currentUser) quickAddNav.style.display = currentUser.role === 'graphics' ? 'none' : '';
+    if (quickAddNav && currentUser) quickAddNav.style.display = '';
 }
 
 function visibleClients(){
     if (!currentUser) return [];
-    if (currentUser.role === 'graphics') return data.clients;
     return data.clients.filter((client) => (client.owner || '').toLowerCase() === currentUser.name.toLowerCase());
 }
 
@@ -54,7 +53,7 @@ function registerLoginHandlers(){
     document.getElementById('quickRegisterForm')?.addEventListener('submit', (event) => {
         event.preventDefault();
         const name = document.getElementById('qr-name').value.trim();
-        const role = document.getElementById('qr-role').value;
+        const role = 'sales';
         if (!name) return;
 
         const existing = users.find((entry) => entry.name.toLowerCase() === name.toLowerCase());
