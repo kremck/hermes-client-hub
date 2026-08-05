@@ -69,9 +69,9 @@ function loadData() {
                         proof: "OldStuff_2026_Spring.pdf",
                         createdAt: pastDate(210),
                         statusHistory: [
-                            { id: "h1", statusId: "s1", note: "Talked to Stacy about renewal", occurredAt: pastDate(220), createdBy: "Jordan Reyes" },
-                            { id: "h2", statusId: "s3", note: "", occurredAt: pastDate(215), createdBy: "Jordan Reyes" },
-                            { id: "h3", statusId: "s7", note: "Ran fine, client confirmed", occurredAt: pastDate(210), createdBy: "Jordan Reyes" }
+                            { id: "h1", statusId: "s1", note: "Talked to Stacy about renewal", occurredAt: pastDate(220), createdBy: "Stacy" },
+                            { id: "h2", statusId: "s3", note: "", occurredAt: pastDate(215), createdBy: "Stacy" },
+                            { id: "h3", statusId: "s7", note: "Ran fine, client confirmed", occurredAt: pastDate(210), createdBy: "Stacy" }
                         ]
                     }
                 ]

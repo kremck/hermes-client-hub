@@ -61,6 +61,16 @@ function renderProjectsList(){
     });
 }
 
+function getProjectAdSortKey(ad) {
+    const latest = ad.statusHistory && ad.statusHistory.length
+        ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0]
+        : null;
+    const statusEntry = latest ? STATUSES.find((entry) => entry.id === latest.statusId) : null;
+    const stageOrder = statusEntry ? statusEntry.sortOrder : 1;
+    const activityDate = latest && latest.occurredAt ? new Date(latest.occurredAt) : new Date(ad.createdAt || 0);
+    return { latest, stageOrder, activityDate };
+}
+
 function openProjectDetail(projectId){
     currentProjectId = projectId;
     const project = data.projects.find((p) => p.id === projectId);
@@ -76,10 +86,17 @@ function openProjectDetail(projectId){
     if (linked.length === 0) {
         list.innerHTML = '<div class="empty">No ads linked to this project yet.</div>';
     } else {
+        linked.sort((left, right) => {
+            const leftKey = getProjectAdSortKey(left.ad);
+            const rightKey = getProjectAdSortKey(right.ad);
+            if (leftKey.stageOrder !== rightKey.stageOrder) {
+                return leftKey.stageOrder - rightKey.stageOrder;
+            }
+            return rightKey.activityDate - leftKey.activityDate;
+        });
+
         linked.forEach(({ client, ad }) => {
-            const latest = ad.statusHistory && ad.statusHistory.length
-                ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0]
-                : null;
+            const latest = getProjectAdSortKey(ad).latest;
             const item = document.createElement('div');
             item.className = 'timeline-item';
             item.style.cursor = 'pointer';
