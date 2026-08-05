@@ -82,6 +82,8 @@ function renderContact(){
     if (!client) return;
 
     contactInfo.innerHTML = `
+        <div class="datefield"><span>Relationship</span><span class="editable-contact" data-field="relationship">${escapeHtml(client.relationship || 'Customer')}</span></div>
+        <div class="datefield"><span>Business type</span><span class="editable-contact" data-field="businessType">${escapeHtml(client.businessType || '—')}</span></div>
         <div class="datefield"><span>Contact</span><span class="editable-contact" data-field="contact">${escapeHtml(client.contact || '—')}</span></div>
         <div class="datefield"><span>Info</span><span class="editable-contact" data-field="info">${escapeHtml(client.info || '—')}</span></div>
         <div class="datefield"><span>Note</span><span class="editable-contact" data-field="note">${escapeHtml(client.note || '—')}</span></div>
@@ -100,7 +102,7 @@ function renderContact(){
             clientEntry[field.getAttribute('data-field')] = nextValue.trim();
             saveData(data);
             renderContact();
-            document.getElementById('d-sub').textContent = `${clientEntry.category || 'Client'} · ${clientEntry.contact || 'No contact name on file'}`;
+            document.getElementById('d-sub').textContent = `${clientEntry.relationship || 'Client'}${clientEntry.businessType ? ' · ' + clientEntry.businessType : ''} · ${clientEntry.contact || 'No contact name on file'}`;
         });
     });
 
@@ -245,7 +247,7 @@ function openDetail(id){
     const client = data.clients.find((entry) => entry.id === currentClientId);
     if (!client) return;
     document.getElementById('d-business').textContent = client.business;
-    document.getElementById('d-sub').textContent = `${client.category || 'Client'} · ${client.contact || 'No contact name on file'}`;
+    document.getElementById('d-sub').textContent = `${client.relationship || 'Client'}${client.businessType ? ' · ' + client.businessType : ''} · ${client.contact || 'No contact name on file'}`;
     document.getElementById('addAdDetails').style.display = currentUser?.role === 'graphics' ? 'none' : '';
     setupAddAd();
     renderCampaignHistory();

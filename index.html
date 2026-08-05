@@ -115,13 +115,22 @@
             <input type="text" id="qa-business" required>
           </div>
           <div class="field">
-            <label>Category</label>
-            <select id="qa-category">
-              <option value="Lead">Lead (not yet a client)</option>
+            <label>Relationship</label>
+            <select id="qa-relationship">
+              <option value="Lead">Lead</option>
+              <option value="Customer" selected>Customer</option>
+              <option value="Business Partner">Business Partner</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Business type</label>
+            <select id="qa-businessType">
+              <option value="">(unspecified)</option>
               <option value="Retail">Retail</option>
+              <option value="Wine">Wine</option>
+              <option value="Accounting">Accounting</option>
               <option value="Antiques/Thrift">Antiques / Thrift</option>
               <option value="Restaurant">Restaurant</option>
-              <option value="Business Partner">Business Partner</option>
               <option value="Other">Other</option>
             </select>
           </div>
@@ -200,8 +209,16 @@
         <div class="detail-sub" id="project-sub"></div>
       </div>
     </div>
-    <div class="section-title">Ads linked to this project</div>
-    <div id="projectAdsList"></div>
+    <div class="detail-columns">
+      <div class="detail-main">
+        <div class="section-title">Ads linked to this project</div>
+        <div id="projectAdsList"></div>
+      </div>
+
+      <div class="detail-side">
+        <div class="side-card card shadow padding" id="projectInfoBox"></div>
+      </div>
+    </div>
   </section>
 
   <!-- DIRECTORY -->
@@ -294,7 +311,7 @@
   <section class="view" id="view-data">
 
     <div class="form-card card shadow padding">
-      <h2>Export data</h2>
+      <h2>Export data (Save as a file)</h2>
       <p style="font-size:14px; color:var(--muted);">
         Download a backup of your client data. Optionally filter to only include ads with a status
         touchpoint in a specific month and/or year — the file name will reflect the filter used.

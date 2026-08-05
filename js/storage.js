@@ -10,6 +10,35 @@ function loadData() {
         if (!Array.isArray(parsed.projects)) {
             parsed.projects = [];
         }
+
+        // Migrate legacy `category` -> `relationship` / `businessType`
+        if (Array.isArray(parsed.clients)) {
+            parsed.clients.forEach((client) => {
+                if (!client) return;
+                // If relationship already present, skip
+                if (!client.relationship) {
+                    if (client.category === 'Lead' || client.category === 'Business Partner') {
+                        client.relationship = client.category;
+                        client.businessType = client.businessType || '';
+                    } else if (client.category) {
+                        client.relationship = 'Customer';
+                        client.businessType = client.category;
+                    } else {
+                        client.relationship = client.relationship || 'Customer';
+                        client.businessType = client.businessType || '';
+                    }
+                }
+
+                // Ensure fields exist
+                client.relationship = client.relationship || 'Customer';
+                client.businessType = client.businessType || '';
+
+                // Remove legacy category to keep data normalized
+                if (client.hasOwnProperty('category'))
+                    delete client.category;
+            });
+        }
+
         return parsed;
     }
 
@@ -21,7 +50,8 @@ function loadData() {
             {
                 id: "c1",
                 business: "Old Stuff Antiques Co-op",
-                category: "Antiques/Thrift",
+                relationship: "Customer",
+                businessType: "Antiques/Thrift",
                 contact: "Stacy Martin",
                 info: "(555) 019-2231 · stacy@oldstuffcoop.com",
                 note: "Runs seasonal ad each quarterly issue.",
@@ -49,7 +79,8 @@ function loadData() {
             {
                 id: "c2",
                 business: "Riverside Thrift & Vintage",
-                category: "Antiques/Thrift",
+                relationship: "Customer",
+                businessType: "Antiques/Thrift",
                 contact: "Marcus Lee",
                 info: "(555) 774-1120",
                 note: "New lead.",

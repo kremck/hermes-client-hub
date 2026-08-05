@@ -56,7 +56,7 @@ function renderProjectsList(){
             <div class="contact">${project.endDate ? 'Ends ' + project.endDate : 'No end date set'}</div>
             <div class="meta"><span>${count} ad(s) linked</span></div>
         `;
-        card.addEventListener('click', () => openProjectDetail(project.id));
+        card.addEventListener('click', () => { openProjectDetail(project.id); renderProjectSideCard(project.id); });
         grid.appendChild(card);
     });
 }
@@ -98,6 +98,82 @@ function openProjectDetail(projectId){
     document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));
     document.getElementById('view-project-detail').classList.add('active');
 }
+
+function renderProjectSideCard(projectId){
+    const box = document.getElementById('projectInfoBox');
+    if (!box) return;
+    const project = data.projects.find((p) => p.id === projectId);
+    if (!project) {
+        box.innerHTML = '';
+        return;
+    }
+
+    // Keep a snapshot for cancel
+    const original = { ...project };
+
+    box.innerHTML = `
+        <h4>Edit Project</h4>
+        <form id="editProjectForm">
+            <div class="field-row">
+                <div class="field"><label>Name</label><input type="text" id="ep-name" value="${escapeHtml(project.name)}"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>End date</label><input type="date" id="ep-enddate" value="${project.endDate || ''}"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Note</label><textarea id="ep-note">${escapeHtml(project.note || '')}</textarea></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" class="btn-secondary-outline" id="ep-cancel">Cancel</button>
+                <button type="button" class="btn-secondary-outline" id="ep-delete" style="color:#c00; border-color:#c00;">Delete</button>
+            </div>
+        </form>
+    `;
+
+    const form = document.getElementById('editProjectForm');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('ep-name').value.trim();
+        if (!name) return alert('Project name is required');
+
+        project.name = name;
+        project.endDate = document.getElementById('ep-enddate').value || '';
+        project.note = document.getElementById('ep-note').value.trim();
+
+        saveData(data);
+        // update header and lists
+        document.getElementById('project-title-header').textContent = project.name;
+        document.getElementById('project-sub').textContent = project.note || 'No notes';
+        renderProjectsList();
+        renderProjectSideCard(projectId);
+    });
+
+    document.getElementById('ep-cancel').addEventListener('click', () => {
+        // revert in-memory (we only modified copy when saving), just re-render
+        renderProjectSideCard(projectId);
+    });
+
+    document.getElementById('ep-delete').addEventListener('click', () => {
+        if (!confirm(`Delete project "${project.name}"? This will unassign it from any linked ads.`)) return;
+
+        // Remove the project
+        data.projects = (data.projects || []).filter((p) => p.id !== projectId);
+
+        // Unassign from any ads that referenced this project
+        (data.clients || []).forEach((client) => {
+            (client.ads || []).forEach((ad) => {
+                if (ad.projectId === projectId) ad.projectId = null;
+            });
+        });
+
+        saveData(data);
+        currentProjectId = null;
+        renderProjectsList();
+        showView('projects');
+    });
+}
+
 
 function backToProjects(){
     showView('projects');
