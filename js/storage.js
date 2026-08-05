@@ -52,11 +52,11 @@ function loadData() {
                 business: "Old Stuff Antiques Co-op",
                 relationship: "Customer",
                 businessType: "Antiques/Thrift",
-                contact: "Stacy Martin",
+                contact: "Andrew Smith",
                 info: "(555) 019-2231 · stacy@oldstuffcoop.com",
                 note: "Runs seasonal ad each quarterly issue.",
                 followup: "",
-                owner: "Jordan Reyes",
+                owner: "Stacy",
                 keyDates: [
                     { label: "Fall issue renewal", date: futureDate(18) },
                     { label: "Anniversary sale", date: futureDate(70) }
@@ -85,7 +85,7 @@ function loadData() {
                 info: "(555) 774-1120",
                 note: "New lead.",
                 followup: futureDate(3),
-                owner: "Jordan Reyes",
+                owner: "Stacy",
                 keyDates: [],
                 ads: []
             }
@@ -116,17 +116,17 @@ function loadUsers() {
     const seed = [
 
         {
-            name: "Jordan Reyes",
+            name: "Christy",
             role: "sales"
         },
 
         {
-            name: "Taylor Brooks",
+            name: "Stacy",
             role: "sales"
         },
 
         {
-            name: "Casey Lin",
+            name: "Kathie",
             role: "sales"
         }
 
