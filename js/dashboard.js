@@ -33,6 +33,36 @@ function getKeyDateTag(days)
     return Object.keys(keyDateTagRules).find((tag) => keyDateTagRules[tag](days)) || 'upcoming';
 }
 
+function getAlertTagTitle(alert)
+{
+    const days = Number.isFinite(alert?.sortDays) ? alert.sortDays : null;
+
+    if (alert?.tag === 'overdue')
+    {
+        return days === null ? 'Overdue' : `Overdue by ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'}`;
+    }
+
+    if (alert?.tag === 'due')
+    {
+        return days === null ? 'Due soon' : `Due in ${days} day${days === 1 ? '' : 's'}`;
+    }
+
+    if (alert?.tag === 'upcoming')
+    {
+        return days === null ? 'Upcoming' : `Upcoming in ${days} day${days === 1 ? '' : 's'}`;
+    }
+
+    if (alert?.tag === 'followup')
+    {
+        if (days === null) return 'Follow up';
+        return days < 0
+            ? `Follow up overdue by ${Math.abs(days)} day${Math.abs(days) === 1 ? '' : 's'}`
+            : `Follow up in ${days} day${days === 1 ? '' : 's'}`;
+    }
+
+    return 'Alert';
+}
+
 function collectReminderEvents()
 {
     const events = [];
@@ -362,7 +392,7 @@ function renderDashboard()
 
             row.innerHTML = `
                 <div style="display:flex; align-items:center; gap:14px; flex:1 1 100%;">
-                    <span class="tag ${alert.tag}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : alert.tag === 'overdue' ? 'Overdue' : 'Follow up'}</span>
+                    <span class="tag ${alert.tag}" title="${escapeHtml(getAlertTagTitle(alert))}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : alert.tag === 'overdue' ? 'Overdue' : 'Follow up'}</span>
                     <span class="who">${escapeHtml(alert.who)}</span>
                     <span class="what">${escapeHtml(alert.what)}</span>
                     

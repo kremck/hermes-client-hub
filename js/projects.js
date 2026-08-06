@@ -29,11 +29,16 @@ function setupAddProject(){
 
 function getAdsForProject(projectId){
     const results = [];
+    const visibleClientIds = new Set(visibleClients().map((client) => client.id));
+
     (data.clients || []).forEach((client) => {
+        if (!visibleClientIds.has(client.id)) return;
+
         (client.ads || []).forEach((ad) => {
             if (ad.projectId === projectId) results.push({ client, ad });
         });
     });
+
     return results;
 }
 
@@ -42,12 +47,14 @@ function renderProjectsList(){
     if (!grid) return;
     grid.innerHTML = '';
 
-    if (!data.projects || data.projects.length === 0) {
+    const projects = visibleProjects();
+
+    if (!projects || projects.length === 0) {
         grid.innerHTML = '<div class="empty">No projects created yet.</div>';
         return;
     }
 
-    data.projects.forEach((project) => {
+    projects.forEach((project) => {
         const count = getAdsForProject(project.id).length;
         const card = document.createElement('div');
         card.className = 'client-card card shadow';

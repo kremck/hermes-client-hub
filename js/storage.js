@@ -116,6 +116,11 @@ function loadUsers() {
     const seed = [
 
         {
+            name: "admin",
+            role: "admin"
+        },
+
+        {
             name: "Christy",
             role: "sales"
         },

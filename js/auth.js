@@ -24,9 +24,20 @@ function applyRolePermissions(){
     if (quickAddNav && currentUser) quickAddNav.style.display = '';
 }
 
+function isAdminUser(user = currentUser){
+    return Boolean(user?.role && user.role.toLowerCase() === 'admin');
+}
+
 function visibleClients(){
     if (!currentUser) return [];
-    return data.clients.filter((client) => (client.owner || '').toLowerCase() === currentUser.name.toLowerCase());
+    if (isAdminUser(currentUser)) return [...(data.clients || [])];
+    return (data.clients || []).filter((client) => (client.owner || '').toLowerCase() === currentUser.name.toLowerCase());
+}
+
+function visibleProjects(){
+    if (!currentUser) return [];
+    if (isAdminUser(currentUser)) return [...(data.projects || [])];
+    return [...(data.projects || [])];
 }
 
 function logout(){
