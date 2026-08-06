@@ -383,12 +383,3 @@ function renderDashboard()
 
 */
 
-function buildAlerts()
-{
-    renderDashboard();
-}
-
-function updateStatistics()
-{
-    renderDashboard();
-}

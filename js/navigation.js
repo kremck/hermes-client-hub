@@ -47,34 +47,10 @@ function setupNavigation()
     }
 }
 
-function openDashboard()
-{
-    showView('dashboard');
-}
-
-function openDirectory()
-{
-    showView('directory');
-}
-
 function backToDirectory()
 {
     showView('directory');
 }
-
-/*in detail.js
-function backToClientDetail()
-{
-    showView('client-detail');
-}
-*/
-
-/*this is in projects.js
-function backToProjects()
-{
-    showView('projects');
-}
-*/
 
 setupNavigation();
 

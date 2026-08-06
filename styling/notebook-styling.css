@@ -2313,7 +2313,7 @@ nav .collapsible > label {
     display: block;
   }
 }
-  }
+  
   form:has(input:invalid) {
     border-color: var(--danger);
   }

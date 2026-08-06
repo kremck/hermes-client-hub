@@ -258,7 +258,6 @@ function openDetail(id){
     document.getElementById('d-breadcrumb').textContent = `Clients > ${client.business}`;
 }
 
-function renderDetail(id){ openDetail(id); }
 function goToClient(id){ if (!id) return; openDetail(id); }
 
 /* ---------- AD DETAIL: the actual status timeline ---------- */
