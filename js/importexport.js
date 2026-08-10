@@ -271,10 +271,107 @@ async function mergeFiles()
     }
 }
 
+/* ---------- EXCEL IMPORT (Account Scout style export -> new clients) ---------- */
+
+const EXCEL_DATA_START_ROW = 16; // 1-indexed, matches spreadsheet row numbers
+const EXCEL_COL_BUSINESS = 0;    // Column A
+const EXCEL_COL_ADV_NUMBER = 2;  // Column C - not imported, used only to sanity-check a row is real
+const EXCEL_COL_CONTACT = 8;     // Column I
+
+async function importClientsFromExcel()
+{
+    const fileInput = document.getElementById('importExcelFile');
+    const file = fileInput?.files[0];
+
+    if (!file)
+    {
+        setStatusMessage('excelImportStatus', 'Choose an Excel file first.', true);
+        return;
+    }
+
+    if (typeof XLSX === 'undefined')
+    {
+        setStatusMessage('excelImportStatus', 'The Excel reading library did not load. Check your internet connection and try again.', true);
+        return;
+    }
+
+    try
+    {
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+        if (!data || !Array.isArray(data.clients))
+        {
+            data = data || {};
+            data.clients = data.clients || [];
+        }
+
+        const existingNames = new Set(data.clients.map((c) => (c.business || '').trim().toLowerCase()));
+        const ownerName = currentUser ? currentUser.name : 'Unassigned';
+
+        let addedCount = 0;
+        let skippedCount = 0;
+
+        for (let i = EXCEL_DATA_START_ROW - 1; i < rows.length; i++)
+        {
+            const row = rows[i];
+            if (!row) continue;
+
+            const business = String(row[EXCEL_COL_BUSINESS] || '').trim();
+            const advNumber = String(row[EXCEL_COL_ADV_NUMBER] || '').trim();
+            const contact = String(row[EXCEL_COL_CONTACT] || '').trim();
+
+            // A real advertiser row has both a name and an advertiser number.
+            // Rows with a name but no number are usually section headers (e.g. sales rep name), not clients.
+            if (!business || !advNumber) continue;
+
+            if (existingNames.has(business.toLowerCase()))
+            {
+                skippedCount += 1;
+                continue;
+            }
+
+            const newClient = {
+                id: `c_${Date.now()}_${addedCount}`,
+                business,
+                category: '',
+                contact,
+                info: '',
+                note: '',
+                followup: '',
+                owner: ownerName,
+                keyDates: [],
+                ads: []
+            };
+
+            data.clients.push(newClient);
+            existingNames.add(business.toLowerCase());
+            addedCount += 1;
+        }
+
+        if (addedCount > 0)
+        {
+            saveData(data);
+            renderDashboard();
+            renderDirectory();
+        }
+
+        const skippedNote = skippedCount > 0 ? ` (${skippedCount} skipped as already on file)` : '';
+        setStatusMessage('excelImportStatus', `Imported ${addedCount} new client(s) from ${file.name}, assigned to ${ownerName}${skippedNote}.`);
+    }
+    catch (error)
+    {
+        setStatusMessage('excelImportStatus', `Could not read that Excel file: ${error.message}`, true);
+    }
+}
+
 /* ---------- Wire up buttons ---------- */
 
 document.getElementById('exportBtn')?.addEventListener('click', exportClientData);
 document.getElementById('importBtn')?.addEventListener('click', importClientData);
 document.getElementById('mergeBtn')?.addEventListener('click', mergeFiles);
+document.getElementById('importExcelBtn')?.addEventListener('click', importClientsFromExcel);
 
 populateExportYearOptions();

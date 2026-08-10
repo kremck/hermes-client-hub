@@ -6,6 +6,7 @@
   <title>Client Hub</title>
   <link rel="stylesheet" href="styling/notebook-styling.css">
   <link rel="stylesheet" href="styling/forms.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -368,6 +369,16 @@
       </div>
       <button class="btn-primary" id="mergeBtn">Merge</button>
       <div id="mergeStatus" style="font-size:13px; margin-top:10px;"></div>
+    </div>
+    <div class="form-card card shadow padding" style="margin-top:24px;">
+      <h2>Import clients from Excel</h2>
+      <p style="font-size:14px; color:var(--muted);">
+        Choose an Account Scout-style advertiser export (.xlsx). New clients found in the file will be
+        added and assigned to your account. Clients already on file (matched by business name) are skipped.
+      </p>
+      <input type="file" id="importExcelFile" accept=".xlsx,.xls" style="margin-bottom:12px; display:block;">
+      <button class="btn-primary" id="importExcelBtn">Import from Excel</button>
+      <div id="excelImportStatus" style="font-size:13px; margin-top:10px;"></div>
     </div>
 
   </section>
