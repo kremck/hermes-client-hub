@@ -156,6 +156,20 @@ textarea {
 .tag.due, .tag.upcoming { background: #f7e6b8; }
 .tag.followup { background: #dce9ff; }
 
+.tag.reserved { background: #e6f7e6; color: #2d6a2d; }
+
+.tag.completed { background: #f0f0f0; color: #444; border: 1px solid rgba(0,0,0,0.06); }
+
+.action-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #e9f0ff;
+  color: #0b4f9a;
+  font-size: 0.85rem;
+}
+
 .detail-columns {
   grid-template-columns: 2fr 1fr;
 }

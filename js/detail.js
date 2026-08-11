@@ -246,7 +246,13 @@ function openDetail(id){
     currentAdId = null;
     const client = data.clients.find((entry) => entry.id === currentClientId);
     if (!client) return;
-    document.getElementById('d-business').textContent = client.business;
+    const info = (typeof getClientActionInfo === 'function') ? getClientActionInfo(client.id) : { nextAction: null, completedCount: 0 };
+    const parts = [];
+    if (info.completedCount && info.completedCount > 0) parts.push(`Completed ${info.completedCount}`);
+    if (info.nextAction) parts.push(`Next: ${info.nextAction}`);
+    const tagText = parts.length ? parts.join(' · ') : null;
+    const actionClass = info.nextAction ? String(info.nextAction).toLowerCase().replace(/\s+/g, '') : (info.completedCount ? 'completed' : '');
+    document.getElementById('d-business').innerHTML = `${escapeHtml(client.business)}${tagText ? ' <span class="action-tag tag ' + escapeHtml(actionClass) + '">' + escapeHtml(tagText) + '</span>' : ''}`;
     document.getElementById('d-sub').textContent = `${client.relationship || 'Client'}${client.businessType ? ' · ' + client.businessType : ''} · ${client.contact || 'No contact name on file'}`;
     document.getElementById('addAdDetails').style.display = '';
     setupAddAd();

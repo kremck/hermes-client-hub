@@ -390,12 +390,19 @@ function renderDashboard()
                 return `<div class="datefield"><span>${escapeHtml(ad.title)}</span><span class="utility">${escapeHtml(statusText + ageText)}</span></div>`;
             }).join('');
 
+            const info = (typeof getClientActionInfo === 'function') ? getClientActionInfo(alert.clientId) : { nextAction: null, completedCount: 0 };
+            const parts = [];
+            if (info.completedCount && info.completedCount > 0) parts.push(`Completed ${info.completedCount}`);
+            if (info.nextAction) parts.push(`Next: ${info.nextAction}`);
+            const tagText = parts.length ? parts.join(' · ') : (alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : alert.tag === 'overdue' ? 'Overdue' : 'Follow up');
+            const actionClass = info.nextAction ? String(info.nextAction).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9\-]/g, '') : (info.completedCount ? 'completed' : alert.tag);
+            const tagTitle = parts.length ? parts.join(' · ') : getAlertTagTitle(alert);
+
             row.innerHTML = `
                 <div style="display:flex; align-items:center; gap:14px; flex:1 1 100%;">
-                    <span class="tag ${alert.tag}" title="${escapeHtml(getAlertTagTitle(alert))}">${alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : alert.tag === 'overdue' ? 'Overdue' : 'Follow up'}</span>
                     <span class="who">${escapeHtml(alert.who)}</span>
+                    <span class="tag ${escapeHtml(actionClass)}" title="${escapeHtml(tagTitle)}">${escapeHtml(tagText)}</span>
                     <span class="what">${escapeHtml(alert.what)}</span>
-                    
                 </div>
                 ${adRows ? `<details class="add-inline" open onclick="event.stopPropagation()" style="flex:1 1 100%;"><summary>Ad statuses</summary>${adRows}</details>` : ''}
             `;
