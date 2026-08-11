@@ -52,6 +52,11 @@ function backToDirectory()
     showView('directory');
 }
 
+function backToProjects()
+{
+    showView('projects');
+}
+
 setupNavigation();
 
 window.addEventListener('load', () =>

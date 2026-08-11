@@ -198,9 +198,4 @@ function renderProjectSideCard(projectId){
     });
 }
 
-
-function backToProjects(){
-    showView('projects');
-}
-
 setupAddProject();
