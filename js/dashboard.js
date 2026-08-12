@@ -77,6 +77,7 @@ function collectReminderEvents()
             if (days !== null && days <= 30)
             {
                 events.push({
+                    source: 'keydate',
                     tag: getKeyDateTag(days),
                     who: client.business,
                     what: keyDate.label,
@@ -376,6 +377,9 @@ function renderDashboard()
     {
         alerts.forEach((alert) =>
         {
+            const node = document.createElement('li');
+            node.className = `alert-node${alert.source === 'keydate' ? ' keydate' : ''}`;
+
             const row = document.createElement('div');
             row.className = 'alert-row';
             row.style.cursor = 'pointer';
@@ -407,7 +411,8 @@ function renderDashboard()
                 ${adRows ? `<details class="add-inline" open onclick="event.stopPropagation()" style="flex:1 1 100%;"><summary>Ad statuses</summary>${adRows}</details>` : ''}
             `;
             row.addEventListener('click', () => goToClient(alert.clientId));
-            list.appendChild(row);
+            node.appendChild(row);
+            list.appendChild(node);
         });
     }
 
