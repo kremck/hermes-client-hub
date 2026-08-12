@@ -148,3 +148,25 @@ function getClientActionInfo(clientId)
 
     return { nextAction, completedCount };
 }
+
+function getAdNextAction(ad)
+{
+    if (!ad) return null;
+    const latest = ad.statusHistory && ad.statusHistory.length
+        ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt || 0) - new Date(a.occurredAt || 0))[0]
+        : null;
+
+    if (!latest) {
+        const initial = STATUSES.find((s) => s.name.toLowerCase() === 'initial contact') || STATUSES[0];
+        const next = STATUSES.find((s) => s.sortOrder === (initial.sortOrder || 0) + 1);
+        return next ? next.name : null;
+    }
+
+    const current = STATUSES.find((s) => s.id === latest.statusId);
+    if (!current) return null;
+    const currentName = current.name.toLowerCase();
+    if (currentName === 'completed' || currentName === 'exported') return null;
+
+    const nextStatus = STATUSES.find((s) => s.sortOrder === current.sortOrder + 1);
+    return nextStatus ? nextStatus.name : null;
+}

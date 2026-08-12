@@ -385,27 +385,39 @@ function renderDashboard()
             row.style.cursor = 'pointer';
 
             const client = data.clients.find((c) => c.id === alert.clientId);
+
             const adRows = (client?.ads || []).map((ad) => {
                 const latest = ad.statusHistory && ad.statusHistory.length
                     ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0]
                     : null;
                 const statusText = latest ? statusName(latest.statusId) : 'No status yet';
                 const ageText = latest && latest.occurredAt ? ` · ${formatWhen(daysUntil(latest.occurredAt))}` : '';
-                return `<div class="datefield"><span>${escapeHtml(ad.title)}</span><span class="utility">${escapeHtml(statusText + ageText)}</span></div>`;
-            }).join('');
+                const nextAction = (typeof getAdNextAction === 'function') ? getAdNextAction(ad) : null;
+                const nextText = nextAction ? ` <span class="next-action">Next: ${escapeHtml(nextAction)}</span>` : '';
 
-            const info = (typeof getClientActionInfo === 'function') ? getClientActionInfo(alert.clientId) : { nextAction: null, completedCount: 0 };
-            const parts = [];
-            if (info.completedCount && info.completedCount > 0) parts.push(`Completed ${info.completedCount}`);
-            if (info.nextAction) parts.push(`Next: ${info.nextAction}`);
-            const tagText = parts.length ? parts.join(' · ') : (alert.tag === 'due' ? 'Due soon' : alert.tag === 'upcoming' ? 'Upcoming' : alert.tag === 'overdue' ? 'Overdue' : 'Follow up');
-            const actionClass = info.nextAction ? String(info.nextAction).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9\-]/g, '') : (info.completedCount ? 'completed' : alert.tag);
-            const tagTitle = parts.length ? parts.join(' · ') : getAlertTagTitle(alert);
+                const adDateDays = latest && latest.occurredAt ? daysUntil(latest.occurredAt) : null;
+                const adDateTag = adDateDays !== null ? getKeyDateTag(adDateDays) : null;
+                const adTagText = adDateDays === null
+                    ? ''
+                    : adDateDays === 0
+                        ? 'Today'
+                        : adDateDays < 0
+                            ? `${Math.abs(adDateDays)} days past`
+                            : `${adDateDays} days coming up`;
+                const adTagTitle = adDateDays === null ? '' : getAlertTagTitle({ tag: adDateTag, sortDays: adDateDays });
+
+                return `<div class="datefield">
+                            <span class="ad-line">
+                                <span class="ad-title">${escapeHtml(ad.title)}</span>
+                                ${adDateTag ? `<span class="ad-tag ${escapeHtml(adDateTag)}" title="${escapeHtml(adTagTitle)}">${escapeHtml(adTagText)}</span>` : ''}
+                            </span>
+                            <span class="utility">${escapeHtml(statusText + ageText)}${nextText}</span>
+                        </div>`;
+            }).join('');
 
             row.innerHTML = `
                 <div style="display:flex; align-items:center; gap:14px; flex:1 1 100%;">
                     <span class="who">${escapeHtml(alert.who)}</span>
-                    <span class="tag ${escapeHtml(actionClass)}" title="${escapeHtml(tagTitle)}">${escapeHtml(tagText)}</span>
                     <span class="what">${escapeHtml(alert.what)}</span>
                 </div>
                 ${adRows ? `<details class="add-inline" open onclick="event.stopPropagation()" style="flex:1 1 100%;"><summary>Ad statuses</summary>${adRows}</details>` : ''}
