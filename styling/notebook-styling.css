@@ -178,10 +178,10 @@ textarea {
   white-space: nowrap;
 }
 
-.ad-tag.due { background: #ffe9c3; color: #7a5200; }
+.ad-tag.due { background: #c9ffc3; color: #1a7a00; }
 .ad-tag.overdue { background: #eee2c6; color: #836a19; }
 .ad-tag.upcoming { background: #dceeff; color: #154a84; }
-.ad-tag.followup { background: #d6f2d7; color: #1f6e30; }
+.ad-tag.followup { background: #d6e3f2; color: #1f396e; }
 .ad-tag.completed { background: #f4f5f6; color: #4d4d4d; border: 1px solid #cfd2d5; }
 .ad-tag.reserved { background: #e6f7e6; color: #2d6a2d; border: 1px solid #b8ddbc; }
 

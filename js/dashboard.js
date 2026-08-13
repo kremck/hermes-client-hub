@@ -33,6 +33,29 @@ function getKeyDateTag(days)
     return Object.keys(keyDateTagRules).find((tag) => keyDateTagRules[tag](days)) || 'upcoming';
 }
 
+function getLatestStatusEntry(ad)
+{
+    if (!ad?.statusHistory?.length) return null;
+    return [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0];
+}
+
+function getAdTagInfo(latest)
+{
+    const days = latest && latest.occurredAt ? daysUntil(latest.occurredAt) : null;
+    const tag = days !== null ? getKeyDateTag(days) : null;
+    const text = days === null
+        ? ''
+        : days === 0
+            ? 'Today'
+            : days < 0
+                ? `${Math.abs(days)} days past`
+                : `${days} days coming up`;
+    const className = days === 0 ? 'followup' : tag;
+    const title = days === null ? '' : getAlertTagTitle({ tag, sortDays: days });
+
+    return { tag, text, className, title };
+}
+
 function getAlertTagTitle(alert)
 {
     const days = Number.isFinite(alert?.sortDays) ? alert.sortDays : null;
@@ -61,6 +84,124 @@ function getAlertTagTitle(alert)
     }
 
     return 'Alert';
+}
+
+function getReminderCounts(clients)
+{
+    let renewals = 0;
+    let keydates = 0;
+    let followups = 0;
+
+    clients.forEach((client) =>
+    {
+        (client.keyDates || []).forEach((keyDate) =>
+        {
+            const days = daysUntil(keyDate.date);
+            if (days !== null && days <= 30 && days >= 0)
+            {
+                keydates++;
+                if (keyDate.label.toLowerCase().includes('renewal') || keyDate.label.toLowerCase().includes('campaign end'))
+                {
+                    renewals++;
+                }
+            }
+        });
+
+        if (client.followup)
+        {
+            const days = daysUntil(client.followup);
+            if (days !== null && days <= 14)
+            {
+                followups++;
+            }
+        }
+    });
+
+    return { renewals, keydates, followups };
+}
+
+function createAdRowHtml(ad)
+{
+    const latest = getLatestStatusEntry(ad);
+    const statusText = latest ? statusName(latest.statusId) : 'No status yet';
+    const ageText = latest && latest.occurredAt ? ` · ${formatWhen(daysUntil(latest.occurredAt))}` : '';
+    const nextAction = (typeof getAdNextAction === 'function') ? getAdNextAction(ad) : null;
+    const nextText = nextAction ? ` <span class="next-action">Next: ${escapeHtml(nextAction)}</span>` : '';
+    const tagInfo = getAdTagInfo(latest);
+
+    return `<div class="datefield">
+                <span class="ad-line">
+                    <span class="ad-title">${escapeHtml(ad.title)}</span>
+                    ${tagInfo.tag ? `<span class="ad-tag ${escapeHtml(tagInfo.className)}" title="${escapeHtml(tagInfo.title)}">${escapeHtml(tagInfo.text)}</span>` : ''}
+                </span>
+                <span class="utility">${escapeHtml(statusText + ageText)}${nextText}</span>
+            </div>`;
+}
+
+function groupEventsByDate(events)
+{
+    return events.reduce((map, event) => {
+        const key = event.date;
+        if (!map[key]) map[key] = [];
+        map[key].push(event);
+        return map;
+    }, {});
+}
+
+function createCalendarDayButton(dayDate, dayIndex, dayEvents)
+{
+    const dayKey = toLocalDateKey(dayDate);
+    const statusColors = [...new Set(dayEvents.filter((e) => e.tag === 'status').map((e) => e.color))];
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'calendar-day';
+
+    if (selectedCalendarDate && toLocalDateKey(selectedCalendarDate) === dayKey)
+        button.classList.add('selected');
+
+    if (toLocalDateKey(new Date()) === dayKey)
+        button.classList.add('today');
+
+    if (dayEvents.length > 0)
+        button.classList.add('has-events');
+
+    button.innerHTML = `
+        <span class="calendar-day-number">${dayIndex}</span>
+        ${dayEvents.length > 0 ? `<span class="calendar-day-badge">${dayEvents.length}</span>` : ''}
+        ${statusColors.length > 0 ? `<span class="calendar-day-dots">${statusColors.map((c) => `<span class="status-dot" style="background:${c}"></span>`).join('')}</span>` : ''}
+    `;
+
+    button.addEventListener('click', () =>
+    {
+        selectedCalendarDate = dayDate;
+        renderDashboard();
+    });
+
+    return button;
+}
+
+function createCalendarEventItem(event)
+{
+    const item = document.createElement('div');
+    item.className = 'calendar-event-item';
+    item.style.cursor = 'pointer';
+
+    if (event.tag === 'status') {
+        item.classList.add('status-' + event.color);
+    }
+
+    item.innerHTML = `
+        <div><strong>${escapeHtml(event.who)}</strong></div>
+        <div>${escapeHtml(event.what)}</div>
+        <div class="detail-sub">${escapeHtml(event.when)}</div>
+    `;
+
+    item.addEventListener('click', () => {
+        if (event.adId) { currentClientId = event.clientId; openAdDetail(event.adId); }
+        else { goToClient(event.clientId); }
+    });
+
+    return item;
 }
 
 function collectReminderEvents()
@@ -221,18 +362,7 @@ function renderCalendar(events)
     const dayCount = lastOfMonth.getDate();
     const startOffset = firstOfMonth.getDay();
 
-    const eventsByDate = {};
-
-    events.forEach((event) =>
-    {
-        const key = event.date;
-
-        if (!eventsByDate[key])
-            eventsByDate[key] = [];
-
-        eventsByDate[key].push(event);
-    });
-
+    const eventsByDate = groupEventsByDate(events);
     calendarGrid.innerHTML = '';
 
     weekdays.forEach((weekday) =>
@@ -255,36 +385,7 @@ function renderCalendar(events)
         const dayDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth(), dayIndex);
         const dayKey = toLocalDateKey(dayDate);
         const dayEvents = eventsByDate[dayKey] || [];
-        const statusColors = [...new Set(dayEvents.filter((e) => e.tag === 'status').map((e) => e.color))];
-        const button = document.createElement('button');
-        const isSelected = selectedCalendarDate && toLocalDateKey(selectedCalendarDate) === dayKey;
-        const isToday = toLocalDateKey(new Date()) === dayKey;
-
-        button.type = 'button';
-        button.className = 'calendar-day';
-
-        if (isSelected)
-            button.classList.add('selected');
-
-        if (isToday)
-            button.classList.add('today');
-
-        if (dayEvents.length > 0)
-            button.classList.add('has-events');
-
-        button.innerHTML = `
-            <span class="calendar-day-number">${dayIndex}</span>
-            ${dayEvents.length > 0 ? `<span class="calendar-day-badge">${dayEvents.length}</span>` : ''}
-            ${statusColors.length > 0 ? `<span class="calendar-day-dots">${statusColors.map((c) => `<span class="status-dot" style="background:${c}"></span>`).join('')}</span>` : ''}
-        `;
-
-        button.addEventListener('click', () =>
-        {
-            selectedCalendarDate = dayDate;
-            renderDashboard();
-        });
-
-        calendarGrid.appendChild(button);
+        calendarGrid.appendChild(createCalendarDayButton(dayDate, dayIndex, dayEvents));
     }
 
     const selectedKey = selectedCalendarDate ? toLocalDateKey(selectedCalendarDate) : null;
@@ -298,27 +399,7 @@ function renderCalendar(events)
 
     dayList.innerHTML = '';
 
-    dayEvents.forEach((event) =>
-    {
-        const item = document.createElement('div');
-        item.className = 'calendar-event-item';
-        item.style.cursor = 'pointer';
-
-        if (event.tag === 'status') {
-            item.classList.add('status-' + event.color);
-        }
-
-        item.innerHTML = `
-            <div><strong>${escapeHtml(event.who)}</strong></div>
-            <div>${escapeHtml(event.what)}</div>
-            <div class="detail-sub">${escapeHtml(event.when)}</div>
-        `;
-        item.addEventListener('click', () => {
-            if (event.adId) { currentClientId = event.clientId; openAdDetail(event.adId); }
-            else { goToClient(event.clientId); }
-        });
-        dayList.appendChild(item);
-    });
+    dayEvents.forEach((event) => dayList.appendChild(createCalendarEventItem(event)));
 }
 
 function renderDashboard()
@@ -333,38 +414,11 @@ function renderDashboard()
     let followups = 0;
     const alerts = collectReminderEvents();
     const clients = visibleClients();
+    const counts = getReminderCounts(clients);
 
-    clients.forEach((client) =>
-    {
-        (client.keyDates || []).forEach((keyDate) =>
-        {
-            const days = daysUntil(keyDate.date);
-
-            if (days !== null && days <= 30 && days >= 0)
-            {
-                keydates++;
-
-                if (keyDate.label.toLowerCase().includes('renewal') || keyDate.label.toLowerCase().includes('campaign end'))
-                {
-                    renewals++;
-                }
-            }
-        });
-
-        if (client.followup)
-        {
-            const days = daysUntil(client.followup);
-
-            if (days !== null && days <= 14)
-            {
-                followups++;
-            }
-        }
-    });
-
-    document.getElementById('stat-renewals').textContent = renewals;
-    document.getElementById('stat-keydates').textContent = keydates;
-    document.getElementById('stat-followups').textContent = followups;
+    document.getElementById('stat-renewals').textContent = counts.renewals;
+    document.getElementById('stat-keydates').textContent = counts.keydates;
+    document.getElementById('stat-followups').textContent = counts.followups;
     document.getElementById('stat-total').textContent = clients.length;
 
     list.innerHTML = '';
@@ -386,34 +440,7 @@ function renderDashboard()
 
             const client = data.clients.find((c) => c.id === alert.clientId);
 
-            const adRows = (client?.ads || []).map((ad) => {
-                const latest = ad.statusHistory && ad.statusHistory.length
-                    ? [...ad.statusHistory].sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))[0]
-                    : null;
-                const statusText = latest ? statusName(latest.statusId) : 'No status yet';
-                const ageText = latest && latest.occurredAt ? ` · ${formatWhen(daysUntil(latest.occurredAt))}` : '';
-                const nextAction = (typeof getAdNextAction === 'function') ? getAdNextAction(ad) : null;
-                const nextText = nextAction ? ` <span class="next-action">Next: ${escapeHtml(nextAction)}</span>` : '';
-
-                const adDateDays = latest && latest.occurredAt ? daysUntil(latest.occurredAt) : null;
-                const adDateTag = adDateDays !== null ? getKeyDateTag(adDateDays) : null;
-                const adTagText = adDateDays === null
-                    ? ''
-                    : adDateDays === 0
-                        ? 'Today'
-                        : adDateDays < 0
-                            ? `${Math.abs(adDateDays)} days past`
-                            : `${adDateDays} days coming up`;
-                const adTagTitle = adDateDays === null ? '' : getAlertTagTitle({ tag: adDateTag, sortDays: adDateDays });
-
-                return `<div class="datefield">
-                            <span class="ad-line">
-                                <span class="ad-title">${escapeHtml(ad.title)}</span>
-                                ${adDateTag ? `<span class="ad-tag ${escapeHtml(adDateTag)}" title="${escapeHtml(adTagTitle)}">${escapeHtml(adTagText)}</span>` : ''}
-                            </span>
-                            <span class="utility">${escapeHtml(statusText + ageText)}${nextText}</span>
-                        </div>`;
-            }).join('');
+            const adRows = (client?.ads || []).map(createAdRowHtml).join('');
 
             row.innerHTML = `
                 <div style="display:flex; align-items:center; gap:14px; flex:1 1 100%;">
