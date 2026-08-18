@@ -152,48 +152,88 @@
       <div class="content">
         <section id="how-to-use" class="card">
           <h1>How to use Client Hub</h1>
-          <p>This area covers the main flow for adding, reviewing, and updating client work in the app.</p>
+          <p>This guide reflects the current app behavior for login, client records, project tracking, and admin visibility.</p>
 
-          <h3 class="section-title">Getting started</h3>
+          <h3 class="section-title">1. Logging in and user roles</h3>
           <ul>
-            <li>Open the app from the main dashboard and choose the tab that matches the task you need.</li>
-            <li>Use Quick Add for new leads or simple entries.</li>
-            <li>To add new projects, such as Best of Mac 2026, navigate to the Add Project tab.</li>
-            <li>Open an existing client to add campaigns, reminders, and follow-up notes.</li>
+            <li>Use the login dropdown to choose a registered user.</li>
+            <li>Users are stored in the browser and may include Sales users and an Admin user.</li>
+            <li>The app recognizes the user role from each profile. A user with the role of <strong>admin</strong> can see all clients, all projects, and all ad records across the system.</li>
+            <li>Sales users are limited to their own assigned clients and their related activity.</li>
           </ul>
 
-          <h3 class="section-title">Common tasks</h3>
+          <details>
+            <summary>What does the admin account do?</summary>
+            <p>The admin account is meant to act as a dashboard-level user. It can review the full client list, view all project records, and inspect all ad work without being restricted to one person's assigned clients.</p>
+          </details>
+          
+          <details>
+            <summary>What happens if I accidentally delete the admin account?</summary>
+            <p>If you accidentally delete the admin account, the app will automatically recreate it when the user list is loaded.</p>
+          </details>
+
+          <h3 class="section-title">2. Adding and editing clients</h3>
           <details>
             <summary>How do I add a new client?</summary>
-            <p>Under "Quick Add", enter the client details. To add campaigns and other project information, open the client from the Clients or Reminders tab and update the record there.</p>
-            <p>Users can attach proof file paths from the client record.</p>
-            <p>To edit the client's details, click the client, and edit the details as needed.</p>
+            <p>Use the Quick Add section to create a new client record quickly. The app will assign the current logged-in user as the client owner when available.</p>
+            <p>Once the client is created, you can open the client detail page to add contact information, relationships, notes, key dates, and ad campaigns.</p>
           </details>
 
           <details>
-            <summary>How do I update a client's information?</summary>
-            
+            <summary>How do I edit the details on a client?</summary>
+            <p>Open the client from the directory or dashboard, then edit the fields shown on the detail page. This includes relationship, business type, contact info, notes, and similar record details.</p>
+            <p>When a client is deleted, the app removes the client record from the saved data and refreshes the directory/dashboard view.</p>
           </details>
+
+          <h3 class="section-title">3. Projects and ad tracking</h3>
+          <details>
+            <summary>How do I create a project?</summary>
+            <p>Open the Projects area and add a project name, optional end date, and note. The project is then available to attach to ad records.</p>
+          </details>
+
+          <details>
+            <summary>How are ads connected to a project?</summary>
+            <p>From a client detail page, add an ad campaign and choose a project from the project dropdown if needed. Each ad can reference a project and keep its own status history.</p>
+            <p>On the project page, you can see which ads are linked to that project and which client they belong to.</p>
+          </details>
+
+          <details>
+            <summary>How do I check ad status?</summary>
+            <p>Each ad keeps a status history. The app shows the newest status first and displays related tracking and reminders in the dashboard and client detail views.</p>
+          </details>
+
+          <h3 class="section-title">4. Dashboard and reminders</h3>
+          <ul>
+            <li>The dashboard summarizes visible clients for the logged-in user.</li>
+            <li>Key dates and follow-ups are grouped by date and shown in the reminder views.</li>
+            <li>Admin users see the full dataset for all clients, which makes dashboard summaries broader than a sales-only view.</li>
+          </ul>
         </section>
 
         <section id="handling-data" class="card">
           <h2>Handling Data</h2>
-          <p>Use the Data tab when you need to share or merge client information across users or devices.</p>
+          <p>Use the Data tools when you need to save, import, merge, or share client data across users or devices.</p>
 
           <details>
-            <summary>How do I connect my clients to everyone else's?</summary>
-            <p>Under the "Data" tab, you have three options:</p>
-            <ul>
-              <li><strong>Export file</strong> - This exports the current data you have in your project.  It does not effect your current data.</li>
-              <li><strong>Import file</strong> - Imports data from a saved JSON file.  This will overwrite your current data on the program.</li>
-            </ul>
+            <summary>What happens when I import data?</summary>
+            <p>Importing a file replaces the current local data with the imported JSON structure. It is a full local replacement, so use it carefully and make sure you are importing the correct file.</p>
           </details>
 
-            <details>
-            <summary>I am confused on how to use the Data tab.</summary>
-            <li><strong>Shared Folder</strong> - This is where you can merge your clients into the main file, as well as pull everyone else's clients.  This is so other team members can access your clients and attach proofs for each ad / campaign.</li>
-            <li><strong>Save File</strong> - This downloads the most concurrent client list, which includes both you and other colleague's client data and campaign data.  This is to back up your data and be able to merge with the main folder.</li>
-            <li><strong>Merge Shared File</strong> - You first choose your most recent save file (ends in .json), and after selecting it, make sure that you have a shared folder chosen.  When you press "Merge file", it will take your uploaded file and cross reference to see if it needs to add new clients.</li>
+          <details>
+            <summary>What happens when I export data?</summary>
+            <p>Export saves the current client/project records to a JSON file so you can back up the data or send it to another user or device.</p>
+          </details>
+
+          <details>
+            <summary>How do I merge data from another source?</summary>
+            <p>Use the merge function with a saved file and compare it against the current app data. The app cross-checks client records and adds missing entries rather than replacing everything blindly.</p>
+            <p>This is useful for combining client lists from coworkers or a shared copy without losing the current local work.</p>
+          </details>
+
+          <details>
+            <summary>How are users managed?</summary>
+            <p>The app stores registered users locally. New users can be added from the user management area and assigned the default Sales role unless they are explicitly created as admin.</p>
+            <p>Admin access is enforced by the role value, and the app ensures an admin user is present in the list if it is missing.</p>
           </details>
         </section>
       </div>
