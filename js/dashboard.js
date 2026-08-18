@@ -120,13 +120,29 @@ function getReminderCounts(clients)
     return { renewals, keydates, followups };
 }
 
+function getNextActionClass(nextAction)
+{
+    if (!nextAction) return '';
+
+    const normalized = String(nextAction).trim().toLowerCase();
+    if (normalized.includes('follow up')) return 'followup';
+    if (normalized.includes('reserved')) return 'reserved';
+    if (normalized.includes('completed')) return 'completed';
+    if (normalized.includes('exported')) return 'reserved';
+    if (normalized.includes('initial contact')) return 'upcoming';
+    if (normalized.includes('info received')) return 'upcoming';
+    if (normalized.includes('approval')) return 'due';
+    return 'upcoming';
+}
+
 function createAdRowHtml(ad)
 {
     const latest = getLatestStatusEntry(ad);
     const statusText = latest ? statusName(latest.statusId) : 'No status yet';
     const ageText = latest && latest.occurredAt ? ` · ${formatWhen(daysUntil(latest.occurredAt))}` : '';
     const nextAction = (typeof getAdNextAction === 'function') ? getAdNextAction(ad) : null;
-    const nextText = nextAction ? ` <span class="next-action">Next: ${escapeHtml(nextAction)}</span>` : '';
+    const nextActionClass = getNextActionClass(nextAction);
+    const nextText = nextAction ? ` <span class="next-action ${nextActionClass}">Next: ${escapeHtml(nextAction)}</span>` : '';
     const tagInfo = getAdTagInfo(latest);
 
     return `<div class="datefield">

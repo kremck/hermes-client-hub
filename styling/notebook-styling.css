@@ -190,10 +190,16 @@ textarea {
   margin-left: 6px;
   padding: 2px 6px;
   border-radius: 8px;
-  background: #eef4ff;
-  color: #0b4f9a;
   font-size: 0.78rem;
+  font-weight: 700;
 }
+
+.next-action.due { background: #c9ffc3; color: #1a7a00; }
+.next-action.overdue { background: #eee2c6; color: #836a19; }
+.next-action.upcoming { background: #dceeff; color: #154a84; }
+.next-action.followup { background: #d6e3f2; color: #1f396e; }
+.next-action.completed { background: #f4f5f6; color: #4d4d4d; border: 1px solid #cfd2d5; }
+.next-action.reserved { background: #e6f7e6; color: #2d6a2d; border: 1px solid #b8ddbc; }
 
 .action-tag {
   display: inline-block;
