@@ -109,37 +109,23 @@ function saveData(dataObject) {
 function loadUsers() {
 
     const raw = localStorage.getItem(USERS_KEY);
-
-    if (raw)
-        return JSON.parse(raw);
-
     const seed = [
-
-        {
-            name: "admin",
-            role: "admin"
-        },
-
-        {
-            name: "Christy",
-            role: "sales"
-        },
-
-        {
-            name: "Stacy",
-            role: "sales"
-        },
-
-        {
-            name: "Kathie",
-            role: "sales"
-        }
-
+        { name: "admin", role: "admin" },
+        { name: "Christy", role: "sales" },
+        { name: "Stacy", role: "sales" },
+        { name: "Kathie", role: "sales" }
     ];
 
-    saveUsers(seed);
+    const parsed = raw ? JSON.parse(raw) : seed;
+    const usersList = Array.isArray(parsed) ? parsed : seed;
+    const adminExists = usersList.some((user) => (user?.name || '').toLowerCase() === 'admin');
 
-    return seed;
+    if (!adminExists) {
+        usersList.unshift({ name: 'admin', role: 'admin' });
+    }
+
+    saveUsers(usersList);
+    return usersList;
 }
 
 function saveUsers(userArray) {

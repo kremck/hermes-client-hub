@@ -11,10 +11,15 @@ async function tryRestoreSession(){
     if (raw) { currentUser = JSON.parse(raw); enterApp(); }
 }
 
+function getUserRoleLabel(user = currentUser){
+    const role = user?.role || 'sales';
+    return String(role).toLowerCase() === 'admin' ? 'Admin' : 'Sales';
+}
+
 function enterApp(){
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appShell').style.display = 'block';
-    document.getElementById('userBadge').textContent = `${currentUser.name} · Sales`;
+    document.getElementById('userBadge').textContent = `${currentUser.name} · ${getUserRoleLabel(currentUser)}`;
     applyRolePermissions();
     showView('dashboard');
 }

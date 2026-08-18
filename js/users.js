@@ -18,7 +18,7 @@ function populateLoginDropdown(){
     users.forEach((user) => {
         const option = document.createElement('option');
         option.value = user.name;
-        option.textContent = `${user.name} (Sales)`;
+        option.textContent = `${user.name} (${getUserRoleLabel(user)})`;
         select.appendChild(option);
     });
 }
@@ -29,10 +29,11 @@ function renderUsersList(){
     list.innerHTML = '';
     if (!users || users.length === 0) { list.innerHTML = '<div class="empty">No registered users yet.</div>'; return; }
     users.forEach((user, index) => {
+        const roleLabel = getUserRoleLabel(user);
         const row = document.createElement('div');
         row.className = 'alert-row';
         row.innerHTML = `
-            <span class="tag upcoming">Sales</span>
+            <span class="tag ${roleLabel === 'Admin' ? 'followup' : 'upcoming'}">${roleLabel}</span>
             <span class="who">${escapeHtml(user.name)}</span>
             <span class="what"></span>
             <button type="button" class="btn-secondary-outline btn-small" data-delete-user="${index}">Delete</button>

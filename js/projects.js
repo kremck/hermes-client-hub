@@ -55,13 +55,17 @@ function renderProjectsList(){
     }
 
     projects.forEach((project) => {
-        const count = getAdsForProject(project.id).length;
+        const linked = getAdsForProject(project.id);
+        const count = linked.length;
+        const owners = [...new Set(linked.map(({ client }) => (client.owner || 'Unassigned')).filter(Boolean))];
+        const ownerText = owners.length ? `Owner(s): ${owners.join(', ')}` : 'No owner attached';
         const card = document.createElement('div');
         card.className = 'client-card card shadow';
         card.innerHTML = `
             <div class="biz">${escapeHtml(project.name)}</div>
             <div class="contact">${project.endDate ? 'Ends ' + project.endDate : 'No end date set'}</div>
             <div class="meta"><span>${count} ad(s) linked</span></div>
+            <div class="contact" style="font-style:italic;">${escapeHtml(ownerText)}</div>
         `;
         card.addEventListener('click', () => { openProjectDetail(project.id); renderProjectSideCard(project.id); });
         grid.appendChild(card);
@@ -110,6 +114,7 @@ function openProjectDetail(projectId){
             item.innerHTML = `
                 <div class="ttitle">${escapeHtml(client.business)} — ${escapeHtml(ad.title)}</div>
                 <div class="tdate">${latest ? statusName(latest.statusId) : 'No status logged'}</div>
+                <div class="contact" style="font-style:italic;">Attached to: ${escapeHtml(client.owner || 'Unassigned')}</div>
             `;
             item.addEventListener('click', () => {
                 currentClientId = client.id;
