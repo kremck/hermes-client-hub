@@ -89,13 +89,24 @@
       </div>
       <div class="dashboard-column">
         <div class="calendar-card card shadow">
-          <div class="calendar-toolbar">
-            <button type="button" class="btn-secondary-outline" id="calendarPrev">&larr; Prev</button>
-            <div class="calendar-title" id="calendarMonthLabel">Month</div>
-            <button type="button" class="btn-secondary-outline" id="calendarNext">Next &rarr;</button>
+          <div class="dashboard-view-toggle" aria-label="Dashboard view switcher">
+            <button type="button" class="dashboard-tab active" data-dashboard-tab="calendar">Calendar</button>
+            <button type="button" class="dashboard-tab" data-dashboard-tab="graph">Graph</button>
           </div>
-          <div id="calendarGrid" class="calendar-grid"></div>
-          <div id="calendarDayList" class="calendar-day-list"></div>
+
+          <div id="calendarPane" class="dashboard-pane active">
+            <div class="calendar-toolbar">
+              <button type="button" class="btn-secondary-outline" id="calendarPrev">&larr; Prev</button>
+              <div class="calendar-title" id="calendarMonthLabel">Month</div>
+              <button type="button" class="btn-secondary-outline" id="calendarNext">Next &rarr;</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+            <div id="calendarDayList" class="calendar-day-list"></div>
+          </div>
+
+          <div id="graphPane" class="dashboard-pane" style="display:none;">
+            <div id="statusGraph" class="status-graph"></div>
+          </div>
         </div>
       </div>
     </div>

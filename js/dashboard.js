@@ -4,6 +4,7 @@
 
 let calendarViewDate = new Date();
 let selectedCalendarDate = null;
+let dashboardTab = 'calendar';
 
 function toLocalDateKey(date)
 {
@@ -418,6 +419,87 @@ function renderCalendar(events)
     dayEvents.forEach((event) => dayList.appendChild(createCalendarEventItem(event)));
 }
 
+function getLatestAdStatusId(ad)
+{
+    if (!ad || !Array.isArray(ad.statusHistory) || ad.statusHistory.length === 0)
+        return STATUSES[0]?.id || null;
+
+    const latest = [...ad.statusHistory].sort((left, right) => new Date(right.occurredAt || 0) - new Date(left.occurredAt || 0))[0];
+    return latest?.statusId || STATUSES[0]?.id || null;
+}
+
+function renderStatusGraph()
+{
+    const graphContainer = document.getElementById('statusGraph');
+    if (!graphContainer) return;
+
+    const counts = new Map();
+    STATUSES.forEach((status) => counts.set(status.name, 0));
+
+    const clients = visibleClients();
+    clients.forEach((client) => {
+        (client.ads || []).forEach((ad) => {
+            const statusId = getLatestAdStatusId(ad);
+            const statusNameText = STATUSES.find((status) => status.id === statusId)?.name || STATUSES[0].name;
+            counts.set(statusNameText, (counts.get(statusNameText) || 0) + 1);
+        });
+    });
+
+    const maxCount = Math.max(1, ...Array.from(counts.values()));
+    const statusColorMap = {
+        'Initial Contact': '#4a90e2',
+        'Follow Up': '#6aa9ff',
+        'Reserved': '#3aa76d',
+        'Info Received': '#5ec26f',
+        'Out for Approval': '#d79a1b',
+        'Exported': '#9b7ae6',
+        'Completed': '#6b7280'
+    };
+
+    graphContainer.innerHTML = '';
+
+    STATUSES.forEach((status) => {
+        const count = counts.get(status.name) || 0;
+        const bar = document.createElement('div');
+        bar.className = 'status-graph-row';
+
+        const label = document.createElement('div');
+        label.className = 'status-graph-label';
+        label.textContent = status.name;
+
+        const barWrap = document.createElement('div');
+        barWrap.className = 'status-graph-bar-wrap';
+
+        const fill = document.createElement('div');
+        fill.className = 'status-graph-fill';
+        fill.style.width = `${Math.max((count / maxCount) * 100, count > 0 ? 12 : 0)}%`;
+        fill.style.background = statusColorMap[status.name] || '#dceeff';
+        fill.title = `${status.name}: ${count}`;
+
+        const value = document.createElement('span');
+        value.className = 'status-graph-value';
+        value.textContent = count;
+
+        barWrap.appendChild(fill);
+        bar.appendChild(label);
+        bar.appendChild(barWrap);
+        bar.appendChild(value);
+        graphContainer.appendChild(bar);
+    });
+}
+
+function setupDashboardTabControls()
+{
+    document.querySelectorAll('.dashboard-tab').forEach((button) => {
+        button.addEventListener('click', () => {
+            dashboardTab = button.getAttribute('data-dashboard-tab') || 'calendar';
+            document.querySelectorAll('.dashboard-tab').forEach((tab) => tab.classList.toggle('active', tab === button));
+            document.getElementById('calendarPane')?.style.setProperty('display', dashboardTab === 'calendar' ? 'block' : 'none');
+            document.getElementById('graphPane')?.style.setProperty('display', dashboardTab === 'graph' ? 'block' : 'none');
+        });
+    });
+}
+
 function renderDashboard()
 {
     const list = document.getElementById('alertList');
@@ -425,9 +507,6 @@ function renderDashboard()
     if (!list)
         return;
 
-    let renewals = 0;
-    let keydates = 0;
-    let followups = 0;
     const alerts = collectReminderEvents();
     const clients = visibleClients();
     const counts = getReminderCounts(clients);
@@ -471,7 +550,21 @@ function renderDashboard()
         });
     }
 
+    const calendarPane = document.getElementById('calendarPane');
+    const graphPane = document.getElementById('graphPane');
+    if (calendarPane && graphPane)
+    {
+        calendarPane.style.display = dashboardTab === 'calendar' ? 'block' : 'none';
+        graphPane.style.display = dashboardTab === 'graph' ? 'block' : 'none';
+    }
+
+    document.querySelectorAll('.dashboard-tab').forEach((tab) => {
+        tab.classList.toggle('active', tab.getAttribute('data-dashboard-tab') === dashboardTab);
+    });
+
     renderCalendar([...alerts, ...collectStatusEvents()]);
+    renderStatusGraph();
+    setupDashboardTabControls();
 }
 
 /*removed this line from the row.innerHTML above:

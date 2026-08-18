@@ -286,6 +286,80 @@ textarea {
   margin-bottom: 16px;
 }
 
+.dashboard-view-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 8px;
+}
+
+.dashboard-tab {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
+  border-radius: 6px 6px 0 0;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dashboard-tab.active {
+  background: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+.dashboard-pane {
+  display: block;
+}
+
+.status-graph {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.status-graph-row {
+  display: grid;
+  grid-template-columns: 150px minmax(100px, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-graph-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.status-graph-bar-wrap {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.status-graph-fill {
+  height: 100%;
+  border-radius: 999px;
+  min-width: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.status-graph-bar-wrap {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.status-graph-value {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
 .calendar-toolbar {
   display: flex;
   justify-content: space-between;
