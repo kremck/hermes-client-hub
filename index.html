@@ -121,15 +121,7 @@
           </div>
           <div class="field">
             <label>Business type</label>
-            <select id="qa-businessType">
-              <option value="">(unspecified)</option>
-              <option value="Retail">Retail</option>
-              <option value="Wine">Wine</option>
-              <option value="Accounting">Accounting</option>
-              <option value="Antiques/Thrift">Antiques / Thrift</option>
-              <option value="Restaurant">Restaurant</option>
-              <option value="Other">Other</option>
-            </select>
+            <input type="text" id="qa-businessType" placeholder="e.g. Retail, Wine, Accounting, Antiques / Thrift">
           </div>
         </div>
         <div class="field-row">
@@ -144,8 +136,8 @@
         </div>
         <div class="field-row">
           <div class="field">
-            <label>Note (what happened / what's next)</label>
-            <textarea id="qa-note" placeholder="e.g. Interested in fall issue, follow up in 2 weeks"></textarea>
+            <label>Sales notes</label>
+            <textarea id="qa-note" rows="5" placeholder="e.g. Discussed a spring ad package, decision-maker is Sarah, budget range is $800–$1,200, they want a proof by Friday, next follow-up on 5/22."></textarea>
           </div>
         </div>
         <div class="field-row">
@@ -155,6 +147,7 @@
           </div>
         </div>
         <button type="submit" class="btn-primary">Save client</button>
+        <div class="form-note">Best notes capture: what happened, who the decision-maker is, what they want, the final ask, and the next action.</div>
         <div class="form-note">This takes about 30 seconds, the goal is to capture the lead before you lose it, not fill out every field.</div>
         <div class="form-note">You can edit this information later at any time.</div>
       </form>
@@ -259,6 +252,10 @@
       </div>
 
       <div class="detail-side">
+        <div class="side-card card shadow padding">
+          <h4>Notes</h4>
+          <div id="clientNoteCard"></div>
+        </div>
         <div class="side-card card shadow padding">
           <h4>Key dates</h4>
           <div id="keyDatesList"></div>

@@ -25,7 +25,7 @@ function setupQuickAdd()
             id: `c${Date.now()}`,
             business,
             relationship: document.getElementById('qa-relationship') ? document.getElementById('qa-relationship').value : 'Customer',
-            businessType: document.getElementById('qa-businessType') ? document.getElementById('qa-businessType').value : '',
+            businessType: document.getElementById('qa-businessType') ? document.getElementById('qa-businessType').value.trim() : '',
             contact: document.getElementById('qa-contact').value.trim(),
             info: document.getElementById('qa-info').value.trim(),
             note: document.getElementById('qa-note').value.trim(),

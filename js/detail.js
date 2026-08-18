@@ -75,6 +75,24 @@ function setupAddAd(){
 
 /* ---------- CLIENT CONTACT / KEY DATES (unchanged logic) ---------- */
 
+function renderNoteCard(){
+    const noteContainer = document.getElementById('clientNoteCard');
+    if (!noteContainer || !currentClientId) return;
+    const client = data.clients.find((entry) => entry.id === currentClientId);
+    if (!client) return;
+
+    noteContainer.innerHTML = `
+        <textarea class="notepad-note editable-note" data-field="note" rows="7">${escapeHtml(client.note || '')}</textarea>
+    `;
+
+    noteContainer.querySelector('.editable-note')?.addEventListener('input', () => {
+        const clientEntry = data.clients.find((entry) => entry.id === currentClientId);
+        if (!clientEntry) return;
+        clientEntry.note = noteContainer.querySelector('.editable-note').value;
+        saveData(data);
+    });
+}
+
 function renderContact(){
     const contactInfo = document.getElementById('contactInfo');
     if (!contactInfo || !currentClientId) return;
@@ -86,7 +104,6 @@ function renderContact(){
         <div class="datefield"><span>Business type</span><span class="editable-contact" data-field="businessType">${escapeHtml(client.businessType || '—')}</span></div>
         <div class="datefield"><span>Contact</span><span class="editable-contact" data-field="contact">${escapeHtml(client.contact || '—')}</span></div>
         <div class="datefield"><span>Info</span><span class="editable-contact" data-field="info">${escapeHtml(client.info || '—')}</span></div>
-        <div class="datefield"><span>Note</span><span class="editable-contact" data-field="note">${escapeHtml(client.note || '—')}</span></div>
         <div class="datefield" style="margin-top:10px; border-bottom:none; justify-content:flex-end;">
             <button type="button" class="btn-secondary-outline btn-small" id="deleteClientBtn">Delete client</button>
         </div>
@@ -239,7 +256,7 @@ function renderKeyDates() {
     });
 }
 
-function renderCampaignHistory(){ renderAdsList(); renderContact(); renderKeyDates(); }
+function renderCampaignHistory(){ renderAdsList(); renderNoteCard(); renderContact(); renderKeyDates(); }
 
 function openDetail(id){
     currentClientId = id;
