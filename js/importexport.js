@@ -367,11 +367,68 @@ async function importClientsFromExcel()
     }
 }
 
+function exportClientsToExcel()
+{
+    if (typeof XLSX === 'undefined')
+    {
+        setStatusMessage('excelExportStatus', 'The Excel writing library did not load. Check your internet connection and try again.', true);
+        return;
+    }
+
+    const clients = typeof visibleClients === 'function' ? visibleClients() : [];
+
+    try
+    {
+        const rows = Array.from({ length: EXCEL_DATA_START_ROW - 1 }, () => []);
+        const exporterName = currentUser?.name || 'Unknown user';
+        const exportedAt = new Date();
+
+        rows[0] = ['Exported by', exporterName];
+        rows[1] = ['Exported on', exportedAt.toISOString()];
+        rows[EXCEL_DATA_START_ROW - 2] = [
+            'Business Name',
+            'Unused Column B',
+            'Advertiser Number',
+            'Unused Column D',
+            'Unused Column E',
+            'Unused Column F',
+            'Unused Column G',
+            'Unused Column H',
+            'Contact'
+        ];
+
+        clients.forEach((client) => {
+            const row = [];
+            row[EXCEL_COL_BUSINESS] = client.business || '';
+            row[EXCEL_COL_ADV_NUMBER] = client.id || '';
+            row[EXCEL_COL_CONTACT] = client.contact || '';
+            rows.push(row);
+        });
+
+        const worksheet = XLSX.utils.aoa_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        workbook.Props = {
+            Author: exporterName,
+            CreatedDate: exportedAt
+        };
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Clients');
+
+        const filename = `client-hub-clients_${exportedAt.toISOString().slice(0, 10)}.xlsx`;
+        XLSX.writeFile(workbook, filename);
+        setStatusMessage('excelExportStatus', `Saved ${filename} with ${clients.length} client(s), exported by ${exporterName}.`);
+    }
+    catch (error)
+    {
+        setStatusMessage('excelExportStatus', `Excel export failed: ${error.message}`, true);
+    }
+}
+
 /* ---------- Wire up buttons ---------- */
 
 document.getElementById('exportBtn')?.addEventListener('click', exportClientData);
 document.getElementById('importBtn')?.addEventListener('click', importClientData);
 document.getElementById('mergeBtn')?.addEventListener('click', mergeFiles);
 document.getElementById('importExcelBtn')?.addEventListener('click', importClientsFromExcel);
+document.getElementById('exportExcelBtn')?.addEventListener('click', exportClientsToExcel);
 
 populateExportYearOptions();
