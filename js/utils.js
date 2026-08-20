@@ -71,34 +71,6 @@ function escapeHtml(str)
     });
 }
 
-function getClientActionTag(clientId)
-{
-    if (!clientId || !data || !Array.isArray(data.clients)) return null;
-    const client = data.clients.find((c) => c.id === clientId);
-    if (!client) return null;
-    const ads = client.ads || [];
-    if (ads.length === 0) return null;
-
-    // Determine the "first" ad by earliest createdAt
-    const firstAd = [...ads].sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0))[0];
-
-    const latest = firstAd.statusHistory && firstAd.statusHistory.length
-        ? [...firstAd.statusHistory].sort((a, b) => new Date(b.occurredAt || 0) - new Date(a.occurredAt || 0))[0]
-        : null;
-
-    // If there's no status yet, assume the next step after "Initial Contact", aka Proposal sent
-    if (!latest) {
-        const initial = STATUSES.find((s) => s.name.toLowerCase() === 'initial contact') || STATUSES[0];
-        const next = STATUSES.find((s) => s.sortOrder === (initial.sortOrder || 0) + 1);
-        return next ? next.name : null;
-    }
-
-    const current = STATUSES.find((s) => s.id === latest.statusId);
-    if (!current) return null;
-    const nextStatus = STATUSES.find((s) => s.sortOrder === current.sortOrder + 1);
-    return nextStatus ? nextStatus.name : null;
-}
-
 function getClientActionInfo(clientId)
 {
     if (!clientId || !data || !Array.isArray(data.clients)) return { nextAction: null, completedCount: 0 };
